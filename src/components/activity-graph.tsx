@@ -1,10 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Contributions } from "@/lib/github";
 import { button } from "@/lib/styles";
 
-export const LEVEL_COLORS = ["#F2F2F2", "#C7C7C7", "#8F8F8F", "#4D4D4D", "#111111"];
+export const LEVEL_COLORS = [
+  "#F2F2F2",
+  "#C7C7C7",
+  "#8F8F8F",
+  "#4D4D4D",
+  "#111111",
+];
 
 const label = "text-[11px] font-medium tracking-[-0.03em] text-black/40";
 
@@ -28,6 +34,22 @@ export function ActivityGraph({
   const [year, setYear] = useState(years[0]);
   const { days, offset } = yearDays(year);
   const levels = data[year] ?? {};
+  const scroller = useRef<HTMLDivElement>(null);
+
+  // Mobile: the grid scrolls sideways. Open on the current week (or December for past years).
+  useEffect(() => {
+    const el = scroller.current;
+    if (!el || el.scrollWidth <= el.clientWidth) return;
+    const today = new Date().toISOString().slice(0, 10);
+    const idx = days.indexOf(today);
+    if (idx === -1) {
+      el.scrollLeft = el.scrollWidth;
+      return;
+    }
+    const col = Math.floor((idx + offset) / 7);
+    el.scrollLeft = (col + 3) * 14 - el.clientWidth;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [year]);
   // Pad partial first/last weeks with empty cells so the grid is a clean rectangle.
   const trailing = (7 - ((offset + days.length) % 7)) % 7;
   const cells: (string | null)[] = [
@@ -37,20 +59,29 @@ export function ActivityGraph({
   ];
 
   return (
-    <section aria-label="GitHub contributions" className="flex items-start gap-4">
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
-        {/* Columns = weeks (Jan → Dec), rows = Sun → Sat */}
-        <div className="grid grid-flow-col grid-rows-7 auto-cols-fr gap-[2px]">
-          {cells.map((date, i) => (
-            <span
-              key={date ?? `pad-${i}`}
-              title={date ?? undefined}
-              className="aspect-square rounded-[2px]"
-              style={{
-                backgroundColor: LEVEL_COLORS[date ? (levels[date] ?? 0) : 0],
-              }}
-            />
-          ))}
+    <section
+      aria-label="GitHub contributions"
+      className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4"
+    >
+      <div className="flex min-w-0 flex-col gap-2 sm:flex-1">
+        {/* Columns = weeks (Jan → Dec), rows = Sun → Sat.
+            Mobile: fixed 12px squares, horizontal scroll. sm+: squares scale to fit. */}
+        <div
+          ref={scroller}
+          className="overflow-x-auto [scrollbar-width:none] [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)] sm:overflow-visible sm:[mask-image:none] [&::-webkit-scrollbar]:hidden"
+        >
+          <div className="grid w-max grid-flow-col grid-rows-7 auto-cols-[12px] gap-[2px] sm:w-auto sm:auto-cols-fr">
+            {cells.map((date, i) => (
+              <span
+                key={date ?? `pad-${i}`}
+                title={date ?? undefined}
+                className="aspect-square rounded-[3px] sm:rounded-[2px]"
+                style={{
+                  backgroundColor: LEVEL_COLORS[date ? (levels[date] ?? 0) : 0],
+                }}
+              />
+            ))}
+          </div>
         </div>
 
         <div className="flex items-center justify-between">
@@ -71,7 +102,7 @@ export function ActivityGraph({
         </div>
       </div>
 
-      <div className="flex shrink-0 flex-col">
+      <div className="order-first flex shrink-0 sm:order-none sm:flex-col">
         {years.map((y) => (
           <button
             key={y}
