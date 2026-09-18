@@ -105,7 +105,7 @@ export function Showcase() {
               key={i === index ? `on-${index}` : "off"}
               className={`absolute inset-0 grid place-items-center ${i === index && calm !== index ? "settle" : ""}`}
             >
-              <ProjectMedia project={p} sizes={50} />
+              <ProjectMedia project={p} />
             </span>
           </span>
         ))}

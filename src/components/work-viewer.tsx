@@ -36,6 +36,9 @@ type Size = {
   horizontal: boolean;
 };
 
+// Whole, even pixel sizes so centered cards never land on a half pixel (which blurs text).
+const even = (n: number) => Math.round(n / 2) * 2;
+
 function useStageSize(ref: React.RefObject<HTMLDivElement | null>) {
   const [size, setSize] = useState<Size | null>(null);
   useLayoutEffect(() => {
@@ -53,11 +56,11 @@ function useStageSize(ref: React.RefObject<HTMLDivElement | null>) {
           w = maxW;
           h = w / 1.5;
         }
-        setSize({ w, h, sw, sh, horizontal });
+        setSize({ w: even(w), h: even(h), sw, sh, horizontal });
       } else {
         const w = Math.min(sw - 48, 592);
         const h = Math.min(w * 1.15, sh * 0.7);
-        setSize({ w, h, sw, sh, horizontal });
+        setSize({ w: even(w), h: even(h), sw, sh, horizontal });
       }
     };
     measure();
@@ -335,7 +338,7 @@ export function WorkViewer({
                 }}
               >
                 <span className="absolute inset-0 grid place-items-center overflow-hidden rounded-[32px] bg-[#F2F2F2]">
-                  <ProjectMedia project={p} sizes={70} />
+                  <ProjectMedia project={p} />
                 </span>
                 {/* Progressive layer blur + white fade toward the viewport edge. */}
                 <span

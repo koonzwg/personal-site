@@ -4,17 +4,13 @@ import type { Project } from "@/lib/projects";
 /**
  * A project's visual, filling whatever card it's in. The image is never cropped: it's shown
  * whole (object-contain) on the project's background color, so it works in the 3:2 home card,
- * the wide desktop viewer, and the taller mobile viewer alike. `scale` zooms in on the
- * centered subject when the export has lots of empty background around it.
+ * the wide desktop viewer, and the taller mobile viewer alike.
+ *
+ * Crispness: `scale` zooms by laying the image out larger (not a CSS transform, which the
+ * browser rasterizes small and then stretches), and exports are served as-is (`unoptimized`)
+ * so text and edges aren't re-compressed. Keep exports as optimized PNGs.
  */
-export function ProjectMedia({
-  project: p,
-  sizes,
-}: {
-  project: Project;
-  /** Layout width hint, in vw at 1x zoom. */
-  sizes: number;
-}) {
+export function ProjectMedia({ project: p }: { project: Project }) {
   if (!p.media) {
     // Placeholder until real work is added.
     return (
@@ -25,17 +21,22 @@ export function ProjectMedia({
   }
   const scale = p.scale ?? 1;
   return (
-    <span className="absolute inset-0" style={{ background: p.background }}>
-      <Image
-        src={p.media}
-        alt={p.title}
-        fill
-        // Ask for a larger file when zoomed so text stays crisp.
-        sizes={`${Math.round(sizes * scale)}vw`}
-        quality={90}
-        className="object-contain"
-        style={{ transform: scale !== 1 ? `scale(${scale})` : undefined }}
-      />
+    <span
+      className="absolute inset-0 overflow-hidden"
+      style={{ background: p.background }}
+    >
+      <span
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+        style={{ width: `${scale * 100}%`, height: `${scale * 100}%` }}
+      >
+        <Image
+          src={p.media}
+          alt={p.title}
+          fill
+          unoptimized
+          className="object-contain"
+        />
+      </span>
     </span>
   );
 }
