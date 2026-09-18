@@ -2,6 +2,7 @@ import { Header } from "@/components/header";
 import { Intro } from "@/components/intro";
 import { Showcase } from "@/components/showcase";
 import { Skills } from "@/components/skills";
+import { Activity } from "@/components/activity";
 
 export default function Home() {
   return (
@@ -12,6 +13,7 @@ export default function Home() {
         <Showcase />
         <Skills />
       </div>
+      <Activity />
     </main>
   );
 }
