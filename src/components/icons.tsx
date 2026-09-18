@@ -29,3 +29,11 @@ export function EmailIcon(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function ChevronRightIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base} strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M6 12L10 8L6 4" />
+    </svg>
+  );
+}

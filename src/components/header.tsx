@@ -1,9 +1,8 @@
 import Image from "next/image";
 import { ResumeIcon, EmailIcon } from "@/components/icons";
+import { buttonPrimary, buttonSecondary } from "@/lib/styles";
 
 const text = "text-[17px] font-medium tracking-[-0.03em] leading-tight";
-const button =
-  "inline-flex h-[34px] items-center gap-[5px] rounded-[10px] px-3 text-[15px] font-medium tracking-[-0.03em] transition-opacity hover:opacity-80";
 
 export function Header() {
   return (
@@ -28,14 +27,14 @@ export function Header() {
           href="/resume.pdf"
           target="_blank"
           rel="noopener noreferrer"
-          className={`${button} bg-black text-white`}
+          className={buttonPrimary}
         >
           <ResumeIcon />
           Resume
         </a>
         <a
           href="mailto:koonzwg@gmail.com"
-          className={`${button} bg-[#F2F2F2] text-[#919191]`}
+          className={buttonSecondary}
         >
           <EmailIcon />
           Email
