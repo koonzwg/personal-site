@@ -1,6 +1,5 @@
 import Image from "next/image";
-import { ResumeIcon, EmailIcon } from "@/components/icons";
-import { buttonPrimary, buttonSecondary } from "@/lib/styles";
+import { Actions } from "@/components/actions";
 
 const text = "text-[17px] font-medium tracking-[-0.03em] leading-tight";
 
@@ -22,24 +21,7 @@ export function Header() {
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
-        <a
-          href="/resume.pdf"
-          target="_blank"
-          rel="noopener noreferrer"
-          className={buttonPrimary}
-        >
-          <ResumeIcon />
-          Resume
-        </a>
-        <a
-          href="mailto:koonzwg@gmail.com"
-          className={buttonSecondary}
-        >
-          <EmailIcon />
-          Email
-        </a>
-      </div>
+      <Actions className="hidden sm:flex" />
     </header>
   );
 }

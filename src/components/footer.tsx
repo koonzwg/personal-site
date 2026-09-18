@@ -2,7 +2,7 @@ import { socials } from "@/lib/socials";
 
 export function Footer() {
   return (
-    <footer className="-mt-6 flex justify-end gap-1">
+    <footer className="-mt-6 flex justify-center sm:justify-end gap-1">
       {socials.map((s) => (
         <a
           key={s.name}
