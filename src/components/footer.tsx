@@ -1,21 +1,21 @@
 import { socials } from "@/lib/socials";
-import { button } from "@/lib/styles";
 
 export function Footer() {
   return (
-    <footer className="-mt-6 flex justify-end">
+    <footer className="-mt-6 flex justify-end gap-1">
       {socials.map((s) => (
         <a
           key={s.name}
           href={s.href}
           target="_blank"
           rel="noopener noreferrer"
-          className={`${button} text-[#919191]`}
+          aria-label={s.name}
+          title={s.name}
+          className="grid size-[34px] place-items-center rounded-[10px] text-[#919191] transition-colors hover:bg-[#F2F2F2] hover:text-black"
         >
-          <svg viewBox="0 0 24 24" width={14} height={14} fill="currentColor" aria-hidden>
+          <svg viewBox="0 0 24 24" width={16} height={16} fill="currentColor" aria-hidden>
             <path d={s.path} />
           </svg>
-          {s.name}
         </a>
       ))}
     </footer>

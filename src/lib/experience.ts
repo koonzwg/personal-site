@@ -16,7 +16,7 @@ export const experience: Role[] = [
     stack: ["Figma", "SwiftUI", "Supabase", "PostgreSQL", "Claude Code"],
   },
   {
-    company: "Product Design Studio",
+    company: "Design Studio",
     title: "Product Designer",
     dates: "Jul 2024 – Mar 2026",
     description:
@@ -32,7 +32,7 @@ export const experience: Role[] = [
     stack: ["Swift", "SwiftUI", "Supabase", "OpenAI API", "Figma"],
   },
   {
-    company: "GoodKleen",
+    company: "Goodkleen",
     title: "Founder",
     dates: "Mar 2023 – Feb 2024",
     description:
@@ -48,7 +48,7 @@ export const experience: Role[] = [
     stack: ["Product strategy", "Web3", "Branding", "Community"],
   },
   {
-    company: "Independent",
+    company: "Self-employed",
     title: "Quantitative Crypto Trader & Strategy Developer",
     dates: "Sep 2017 – Oct 2021",
     description:
