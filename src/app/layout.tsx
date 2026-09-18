@@ -11,12 +11,8 @@ const description =
   "Design engineer working across product strategy, UX/UI, engineering, and AI — from first idea to shipped software.";
 
 export const metadata: Metadata = {
-  // Set NEXT_PUBLIC_SITE_URL once the domain is live; Vercel's URL is the fallback.
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ??
-      (process.env.VERCEL_PROJECT_PRODUCTION_URL
-        ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-        : "http://localhost:3000"),
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://williamkoonz.com",
   ),
   title: "William Koonz — Design Engineer",
   description,

@@ -10,6 +10,7 @@ export const resume = {
   // PDF only — kept off the public web page to avoid scraping.
   phone: "602-354-0598",
   links: [
+    { label: "williamkoonz.com", href: "https://williamkoonz.com" },
     { label: "github.com/koonzwg", href: "https://github.com/koonzwg" },
     { label: "linkedin.com/in/williamkoonz", href: "https://www.linkedin.com/in/williamkoonz" },
   ],
