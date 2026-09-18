@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { ChevronRightIcon } from "@/components/icons";
+import { ViewAllButton } from "@/components/work-viewer";
 import { buttonSecondary } from "@/lib/styles";
 
 // Inverted 16px fillet: white outside a quarter circle anchored bottom-left.
@@ -14,10 +13,7 @@ export function Showcase() {
       <div className="absolute top-0 right-0 rounded-bl-2xl bg-white pb-2.5 pl-2.5">
         <span aria-hidden className={`${fillet} top-0 right-full`} />
         <span aria-hidden className={`${fillet} top-full right-0`} />
-        <Link href="/work" className={buttonSecondary}>
-          View all
-          <ChevronRightIcon className="-mx-1" />
-        </Link>
+        <ViewAllButton className={buttonSecondary} />
       </div>
     </section>
   );
