@@ -1,11 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { CheckIcon, EmailIcon, ResumeIcon } from "@/components/icons";
 import { buttonPrimary, buttonSecondary, nudge } from "@/lib/styles";
 
 const EMAIL = "koonzwg@gmail.com";
-const SWAP = "transition-[opacity,filter,transform] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]";
+const SWAP =
+  "transition-[opacity,filter,transform] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]";
 
 /**
  * Email copies the address (a mailto does nothing for anyone without a mail app set up).
@@ -43,7 +45,9 @@ function EmailButton() {
     <a
       href={`mailto:${EMAIL}`}
       onClick={onClick}
-      aria-label={copied ? "Email address copied" : `Copy email address ${EMAIL}`}
+      aria-label={
+        copied ? "Email address copied" : `Copy email address ${EMAIL}`
+      }
       className={`${buttonSecondary} ${copied ? "text-[#5E5E5E]" : ""}`}
     >
       <span className="relative grid size-4 place-items-center">
@@ -92,15 +96,10 @@ export function Actions({
 }) {
   return (
     <div className={`items-center gap-2 ${className}`} style={style}>
-      <a
-        href="/resume.pdf"
-        target="_blank"
-        rel="noopener noreferrer"
-        className={buttonPrimary}
-      >
+      <Link href="/resume" className={buttonPrimary}>
         <ResumeIcon className={nudge.lift} />
         Resume
-      </a>
+      </Link>
       <EmailButton />
     </div>
   );
