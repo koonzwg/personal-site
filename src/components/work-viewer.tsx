@@ -68,15 +68,25 @@ function useStageSize(ref: React.RefObject<HTMLDivElement | null>) {
   return size;
 }
 
+const MORPH = 620; // ms — card growing out of / back into the home-page card
+
 export function WorkViewer({
   onExit,
   initial = 0,
+  origin,
 }: {
-  onExit: () => void;
+  onExit: (active: number) => void;
   initial?: number;
+  /** Where the home-page card sits on screen; the active card morphs from/to it. */
+  origin?: DOMRect | null;
 }) {
   const [active, setActive] = useState(initial);
   const [shown, setShown] = useState(false);
+  // "origin": active card sits exactly over the home-page card. "open": full view.
+  const [phase, setPhase] = useState<"origin" | "open">(
+    origin ? "origin" : "open",
+  );
+  const [stageRect, setStageRect] = useState<DOMRect | null>(null);
   const stage = useRef<HTMLDivElement>(null);
   const root = useRef<HTMLDivElement>(null);
   const controls = useRef<HTMLDivElement>(null);
@@ -97,21 +107,67 @@ export function WorkViewer({
     [last],
   );
 
+  const closing = useRef(false);
   const exit = useCallback(() => {
+    if (closing.current) return;
+    closing.current = true;
     setShown(false);
-    setTimeout(onExit, 220);
-  }, [onExit]);
+    if (origin) setPhase("origin"); // shrink back into the home-page card
+    setTimeout(() => onExit(active), origin ? MORPH - 40 : 220);
+  }, [onExit, origin, active]);
 
-  // Enter animation, scroll lock, focus.
+  // Scroll lock + focus.
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    requestAnimationFrame(() => setShown(true));
-    root.current?.focus();
+    root.current?.focus({ preventScroll: true });
     return () => {
       document.body.style.overflow = prev;
     };
   }, []);
+
+  // Once the stage is measured, grow the card out of its origin (two frames so the
+  // starting position paints first).
+  useLayoutEffect(() => {
+    if (!size || !stage.current) return;
+    setStageRect(stage.current.getBoundingClientRect());
+  }, [size]);
+  const started = useRef(false);
+  useEffect(() => {
+    if (!size || !stageRect || started.current) return;
+    started.current = true;
+    // Not cancelled on re-render: re-measures must not strand the view half-open.
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        setShown(true);
+        setPhase("open");
+      }),
+    );
+  }, [size, stageRect]);
+
+  // Keep Tab focus inside the viewer.
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key !== "Tab" || !root.current) return;
+    const items = Array.from(
+      root.current.querySelectorAll<HTMLElement>(
+        "button:not([disabled]), a[href]",
+      ),
+    ).filter((el) => el.tabIndex >= 0);
+    if (!items.length) return;
+    const first = items[0];
+    const lastEl = items[items.length - 1];
+    if (
+      e.shiftKey &&
+      (document.activeElement === first ||
+        document.activeElement === root.current)
+    ) {
+      e.preventDefault();
+      lastEl.focus();
+    } else if (!e.shiftKey && document.activeElement === lastEl) {
+      e.preventDefault();
+      first.focus();
+    }
+  };
 
   // Keyboard.
   useEffect(() => {
@@ -186,20 +242,21 @@ export function WorkViewer({
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
       onTouchCancel={onTouchEnd}
-      className="fixed inset-0 z-50 touch-none overflow-hidden bg-white outline-none"
-      style={{
-        opacity: shown ? 1 : 0,
-        transition: `opacity ${shown ? 260 : 200}ms ${EASE}`,
-      }}
+      onKeyDown={onKeyDown}
+      className="fixed inset-0 z-50 touch-none overflow-hidden outline-none"
     >
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-white"
+        style={{
+          opacity: shown ? 1 : 0,
+          transition: `opacity ${shown ? 380 : 320}ms ${EASE}`,
+        }}
+      />
       <div
         ref={stage}
         className="absolute inset-x-0 top-6 sm:top-12"
-        style={{
-          bottom: controlsH + 16,
-          transform: shown ? "none" : "translateY(8px)",
-          transition: `transform ${DURATION}ms ${EASE}`,
-        }}
+        style={{ bottom: controlsH + 16 }}
       >
         {size &&
           projects.map((p, i) => {
@@ -226,9 +283,28 @@ export function WorkViewer({
               : offset < 0
                 ? "top"
                 : "bottom";
+            // Morph: while in the "origin" phase the active card is sized and placed exactly over
+            // the home-page card, then eases into the full view (and back on exit).
+            const atOrigin =
+              isActive && phase === "origin" && origin && stageRect;
+            const w = atOrigin ? origin.width : size.w;
+            const h = atOrigin ? origin.height : size.h;
+            const ox = atOrigin
+              ? origin.left +
+                origin.width / 2 -
+                (stageRect.left + stageRect.width / 2)
+              : 0;
+            const oy = atOrigin
+              ? origin.top +
+                origin.height / 2 -
+                (stageRect.top + stageRect.height / 2)
+              : 0;
+            const morph = `${MORPH}ms ${EASE}`;
             const t = dragging
               ? "none"
-              : `transform ${DURATION}ms ${EASE}, opacity ${DURATION}ms ${EASE}`;
+              : isActive
+                ? `transform ${morph}, width ${morph}, height ${morph}, opacity ${DURATION}ms ${EASE}`
+                : `transform ${DURATION}ms ${EASE}, opacity ${shown ? DURATION : 260}ms ${EASE}`;
             const fade = `opacity ${DURATION}ms ${EASE}`;
             // Only a slice of each neighbor is on screen, so the blur/fade run across that slice.
             const visible = horizontal
@@ -243,20 +319,22 @@ export function WorkViewer({
                 tabIndex={isActive ? -1 : 0}
                 aria-label={isActive ? p.title : `Show ${p.title}`}
                 onClick={() => !isActive && go(Math.sign(offset))}
-                className={`absolute top-1/2 left-1/2 ${
+                className={`group/card absolute top-1/2 left-1/2 outline-none ${
                   isActive ? "cursor-default" : "cursor-pointer"
                 }`}
                 style={{
-                  width: size.w,
-                  height: size.h,
-                  transform: `translate(calc(-50% + ${x + (horizontal ? drag : 0)}px), calc(-50% + ${y + (horizontal ? 0 : drag)}px)) scale(${isActive ? 1 : 0.97})`,
-                  opacity: Math.abs(offset) > 1 ? 0 : 1,
+                  width: w,
+                  height: h,
+                  transform: `translate(calc(-50% + ${x + ox + (horizontal ? drag : 0)}px), calc(-50% + ${y + oy + (horizontal ? 0 : drag)}px)) scale(${isActive ? 1 : 0.97})`,
+                  // Neighbors fade in around the active card as the view opens.
+                  opacity:
+                    Math.abs(offset) > 1 || (!isActive && !shown) ? 0 : 1,
                   transition: t,
                   willChange: "transform",
                 }}
               >
-                <span className="absolute inset-0 overflow-hidden rounded-[32px] bg-[#F2F2F2]">
-                  {p.media && (
+                <span className="absolute inset-0 grid place-items-center overflow-hidden rounded-[32px] bg-[#F2F2F2]">
+                  {p.media ? (
                     <Image
                       src={p.media}
                       alt=""
@@ -264,17 +342,22 @@ export function WorkViewer({
                       sizes="80vw"
                       className="object-cover"
                     />
+                  ) : (
+                    // Placeholder (matches the home-page card) until real work is added.
+                    <span className="px-10 text-center text-[28px] font-semibold tracking-[-0.04em] text-black/[0.07]">
+                      {p.title.split(":")[0]}
+                    </span>
                   )}
                 </span>
                 {/* Progressive layer blur + white fade toward the viewport edge. */}
                 <span
                   aria-hidden
-                  className="pointer-events-none absolute"
-                  style={{
-                    inset: -BLEED,
-                    opacity: isActive ? 0 : 1,
-                    transition: fade,
-                  }}
+                  className={`pointer-events-none absolute ${
+                    isActive
+                      ? "opacity-0"
+                      : "opacity-100 group-hover/card:opacity-75"
+                  }`}
+                  style={{ inset: -BLEED, transition: fade }}
                 >
                   {BLUR_LAYERS.map((l) => {
                     const perp = horizontal ? "bottom" : "right";
@@ -311,6 +394,11 @@ export function WorkViewer({
       <div
         ref={controls}
         className="absolute inset-x-0 bottom-0 z-10 bg-linear-to-t from-white from-60% to-transparent pt-16"
+        style={{
+          opacity: shown ? 1 : 0,
+          transform: shown ? "none" : "translateY(10px)",
+          transition: `opacity ${shown ? 420 : 200}ms ${EASE} ${shown ? 120 : 0}ms, transform ${shown ? 520 : 200}ms ${EASE} ${shown ? 120 : 0}ms`,
+        }}
       >
         <div className="mx-auto flex w-full max-w-[640px] flex-col gap-2 px-6 pb-6 sm:pb-12">
           <div aria-live="polite" className="rounded-[20px] bg-[#F2F2F2] p-4">
@@ -356,7 +444,11 @@ export function WorkViewer({
               <ChevronRightIcon
                 width={20}
                 height={20}
-                className={horizontal ? "rotate-180" : "rotate-90"}
+                className={`transition-transform duration-200 ease-out ${
+                  horizontal
+                    ? "rotate-180 group-hover:-translate-x-0.5"
+                    : "rotate-90 group-hover:translate-y-0.5"
+                }`}
               />
             </ControlButton>
             <ControlButton label="Exit" onClick={exit}>
@@ -372,7 +464,11 @@ export function WorkViewer({
               <ChevronRightIcon
                 width={20}
                 height={20}
-                className={horizontal ? "" : "-rotate-90"}
+                className={`transition-transform duration-200 ease-out ${
+                  horizontal
+                    ? "group-hover:translate-x-0.5"
+                    : "-rotate-90 group-hover:-translate-y-0.5"
+                }`}
               />
             </ControlButton>
           </div>
@@ -399,7 +495,7 @@ function ControlButton({
       aria-label={label}
       disabled={disabled}
       onClick={onClick}
-      className="grid h-12 cursor-pointer place-items-center rounded-full bg-[#F2F2F2] text-[#919191] transition-[color,opacity,transform] duration-150 outline-none hover:text-black focus-visible:ring-2 focus-visible:ring-black/20 active:scale-[0.97] disabled:cursor-default disabled:opacity-40 disabled:hover:text-[#919191]"
+      className="group grid h-12 cursor-pointer place-items-center rounded-full bg-[#F2F2F2] text-[#919191] transition-[color,background-color,opacity,transform] duration-150 outline-none hover:bg-[#EAEAEA] hover:text-black focus-visible:ring-2 focus-visible:ring-black/20 active:scale-[0.97] disabled:cursor-default disabled:opacity-40 disabled:hover:bg-[#F2F2F2] disabled:hover:text-[#919191]"
     >
       {children}
     </button>

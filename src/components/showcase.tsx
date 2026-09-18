@@ -21,6 +21,16 @@ const FIRST_ADVANCE = 2200 + INTERVAL; // let the entrance finish first
 export function Showcase() {
   const [index, setIndex] = useState(0);
   const [open, setOpen] = useState<number | null>(null);
+  const [origin, setOrigin] = useState<DOMRect | null>(null);
+  // Coming back from the viewer: swap to the project you left on instantly (no crossfade),
+  // so the shrinking card lands on exactly what the home card shows.
+  const [snap, setSnap] = useState(false);
+  const [calm, setCalm] = useState<number | null>(null); // skip the settle zoom on that landing
+  useEffect(() => {
+    if (!snap) return;
+    const t = setTimeout(() => setSnap(false), 60);
+    return () => clearTimeout(t);
+  }, [snap]);
   const opener = useRef<HTMLElement | null>(null);
   const card = useRef<HTMLElement>(null);
   const paused = useRef({ hover: false, offscreen: false });
@@ -53,9 +63,13 @@ export function Showcase() {
 
   const onOpen = (e: React.MouseEvent<HTMLElement>) => {
     opener.current = e.currentTarget;
+    setOrigin(card.current?.getBoundingClientRect() ?? null); // the viewer grows out of this card
     setOpen(index); // open on whichever project is showing
   };
-  const close = useCallback(() => {
+  const close = useCallback((active: number) => {
+    setSnap(true);
+    setCalm(active);
+    setIndex(active); // come back showing the project you left on
     setOpen(null);
     opener.current?.focus({ preventScroll: true });
   }, []);
@@ -82,11 +96,14 @@ export function Showcase() {
             key={p.title}
             aria-hidden
             className="absolute inset-0 transition-opacity duration-[900ms] ease-in-out"
-            style={{ opacity: i === index ? 1 : 0 }}
+            style={{
+              opacity: i === index ? 1 : 0,
+              transitionDuration: snap ? "0ms" : undefined,
+            }}
           >
             <span
               key={i === index ? `on-${index}` : "off"}
-              className={`absolute inset-0 grid place-items-center ${i === index ? "settle" : ""}`}
+              className={`absolute inset-0 grid place-items-center ${i === index && calm !== index ? "settle" : ""}`}
             >
               {p.media ? (
                 <Image
@@ -137,7 +154,7 @@ export function Showcase() {
 
       {open !== null &&
         createPortal(
-          <WorkViewer initial={open} onExit={close} />,
+          <WorkViewer initial={open} origin={origin} onExit={close} />,
           document.body,
         )}
     </section>
