@@ -7,7 +7,7 @@ import { button, delay } from "@/lib/styles";
 const tag = `${button} shrink-0 bg-[#F2F2F2] text-[#919191] hover:opacity-100`;
 
 // Motion: glide in fast, decay into a slow drift. Rows travel in opposite directions.
-const BASE_SPEED = 14; // px/s at rest
+const BASE_SPEED = 10; // px/s at rest
 const BOOST = 1400; // extra px/s at the start
 const DECAY = 0.38; // s — how quickly the boost bleeds off
 const START_DELAY = 450; // ms — lines up with the page's entrance sequence

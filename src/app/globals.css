@@ -54,6 +54,29 @@ body {
   animation-delay: var(--d, 0ms);
 }
 
+/* Showcase: arrives as a plain rounded card, then the top-right corner is carved out. */
+@keyframes corner-square {
+  from {
+    border-top-right-radius: 32px;
+  }
+}
+@keyframes carve {
+  from {
+    transform: scale(0);
+  }
+}
+@utility showcase-in {
+  animation:
+    enter 650ms cubic-bezier(0.22, 1, 0.36, 1) both,
+    corner-square 750ms cubic-bezier(0.76, 0, 0.24, 1) both;
+  animation-delay: var(--d, 0ms), var(--carve-d, 0ms);
+}
+@utility carve {
+  transform-origin: top right;
+  animation: carve 750ms cubic-bezier(0.76, 0, 0.24, 1) both;
+  animation-delay: var(--carve-d, 0ms);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
