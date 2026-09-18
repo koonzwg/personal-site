@@ -14,7 +14,7 @@ const heading = `${type} font-semibold text-black`;
 
 export default function ResumePage() {
   return (
-    <main className="mx-auto flex w-full max-w-[640px] flex-col gap-10 px-6 py-16 sm:py-24">
+    <main className="mx-auto flex w-full max-w-[640px] flex-col gap-10 px-6 pt-10 pb-16 sm:py-24">
       <nav className="enter flex items-center justify-between">
         <Link href="/" className={buttonSecondary}>
           <ChevronRightIcon className="-mx-1 rotate-180 transition-transform duration-200 ease-out group-hover:-translate-x-0.5" />

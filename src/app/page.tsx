@@ -8,7 +8,7 @@ import { Footer } from "@/components/footer";
 
 export default function Home() {
   return (
-    <main className="mx-auto flex w-full max-w-[640px] flex-col gap-10 px-6 py-24">
+    <main className="mx-auto flex w-full max-w-[640px] flex-col gap-10 px-6 pt-10 pb-16 sm:py-24">
       <Header />
       <Intro />
       <div className="flex flex-col gap-6">
