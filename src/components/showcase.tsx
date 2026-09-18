@@ -16,7 +16,7 @@ export function Showcase() {
         <span aria-hidden className={`${fillet} top-full right-0`} />
         <Link href="/work" className={buttonSecondary}>
           View all
-          <ChevronRightIcon />
+          <ChevronRightIcon className="-mx-1" />
         </Link>
       </div>
     </section>
