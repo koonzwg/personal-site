@@ -12,9 +12,18 @@ import { createPortal } from "react-dom";
 import { ArrowUpRightIcon, ChevronRightIcon } from "@/components/icons";
 import { projects } from "@/lib/projects";
 
-const EASE = "cubic-bezier(0.32, 0.72, 0, 1)";
-const DURATION = 320;
-const GAP = 16;
+// Long, soft ease-out: moves quickly, then settles gently.
+const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
+const DURATION = 560;
+const GAP = 10;
+// Progressive blur on neighbors: stacked layers, each blurrier and masked closer to the outer edge.
+const BLUR_LAYERS = [
+  { blur: 1, from: 0 },
+  { blur: 2, from: 15 },
+  { blur: 4, from: 30 },
+  { blur: 8, from: 45 },
+  { blur: 16, from: 60 },
+];
 
 type Size = { w: number; h: number; horizontal: boolean };
 
@@ -124,19 +133,28 @@ function Overlay({ onExit }: { onExit: () => void }) {
     }
   };
 
-  // Touch swipe.
+  // Touch: cards follow the finger 1:1, then settle to the nearest project.
   const touch = useRef<{ x: number; y: number } | null>(null);
+  const [drag, setDrag] = useState(0);
   const onTouchStart = (e: React.TouchEvent) => {
     touch.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
   };
-  const onTouchEnd = (e: React.TouchEvent) => {
+  const onTouchMove = (e: React.TouchEvent) => {
     if (!touch.current) return;
-    const dx = touch.current.x - e.changedTouches[0].clientX;
-    const dy = touch.current.y - e.changedTouches[0].clientY;
-    const d = size?.horizontal ? dx : dy;
-    if (Math.abs(d) > 40) go(Math.sign(d));
+    let d = size?.horizontal
+      ? e.touches[0].clientX - touch.current.x
+      : e.touches[0].clientY - touch.current.y;
+    // Rubber-band past the first/last project.
+    if ((active === 0 && d > 0) || (active === last && d < 0)) d /= 3;
+    setDrag(d);
+  };
+  const onTouchEnd = () => {
+    if (!touch.current) return;
+    if (Math.abs(drag) > 50) go(drag < 0 ? 1 : -1);
+    setDrag(0);
     touch.current = null;
   };
+  const dragging = drag !== 0;
 
   const project = projects[active];
   const horizontal = size?.horizontal ?? true;
@@ -150,7 +168,9 @@ function Overlay({ onExit }: { onExit: () => void }) {
       tabIndex={-1}
       onWheel={onWheel}
       onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
+      onTouchCancel={onTouchEnd}
       className="fixed inset-0 z-50 touch-none overflow-hidden bg-white outline-none"
       style={{
         opacity: shown ? 1 : 0,
@@ -171,20 +191,30 @@ function Overlay({ onExit }: { onExit: () => void }) {
             const offset = i - active;
             if (Math.abs(offset) > 2) return null;
             const isActive = offset === 0;
-            const step = (horizontal ? size.w : size.h) + GAP;
-            const x = horizontal ? offset * step : 0;
-            const y = horizontal ? 0 : offset * step;
-            // Neighbors fade toward the viewport edge.
-            const dir = horizontal
+            // Neighbors are scaled to 0.97, so offset by their scaled size to keep a true GAP.
+            const len = horizontal ? size.w : size.h;
+            const n = Math.abs(offset);
+            const dist =
+              n === 0
+                ? 0
+                : len / 2 +
+                  (len * 0.97) / 2 +
+                  GAP +
+                  (n - 1) * (len * 0.97 + GAP);
+            const x = horizontal ? Math.sign(offset) * dist : 0;
+            const y = horizontal ? 0 : Math.sign(offset) * dist;
+            // Neighbors: progressive blur + white fade toward the viewport edge.
+            const outer = horizontal
               ? offset < 0
-                ? "to left"
-                : "to right"
+                ? "left"
+                : "right"
               : offset < 0
-                ? "to top"
-                : "to bottom";
-            const mask = isActive
+                ? "top"
+                : "bottom";
+            const t = dragging
               ? "none"
-              : `linear-gradient(${dir}, black 20%, transparent 95%)`;
+              : `transform ${DURATION}ms ${EASE}, opacity ${DURATION}ms ${EASE}`;
+            const fade = `opacity ${DURATION}ms ${EASE}`;
             return (
               <button
                 key={p.title}
@@ -198,13 +228,10 @@ function Overlay({ onExit }: { onExit: () => void }) {
                 style={{
                   width: size.w,
                   height: size.h,
-                  transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(${isActive ? 1 : 0.97})`,
-                  opacity: isActive ? 1 : Math.abs(offset) === 1 ? 0.6 : 0,
-                  filter: isActive ? "none" : "blur(4px)",
-                  maskImage: mask,
-                  WebkitMaskImage: mask,
-                  transition: `transform ${DURATION}ms ${EASE}, opacity ${DURATION}ms ${EASE}, filter ${DURATION}ms ${EASE}`,
-                  willChange: "transform, opacity, filter",
+                  transform: `translate(calc(-50% + ${x + (horizontal ? drag : 0)}px), calc(-50% + ${y + (horizontal ? 0 : drag)}px)) scale(${isActive ? 1 : 0.97})`,
+                  opacity: Math.abs(offset) > 1 ? 0 : 1,
+                  transition: t,
+                  willChange: "transform",
                 }}
               >
                 {p.media && (
@@ -216,6 +243,33 @@ function Overlay({ onExit }: { onExit: () => void }) {
                     className="object-cover"
                   />
                 )}
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0"
+                  style={{ opacity: isActive ? 0 : 1, transition: fade }}
+                >
+                  {BLUR_LAYERS.map((l) => {
+                    const m = `linear-gradient(to ${outer}, transparent ${l.from}%, black ${l.from + 25}%)`;
+                    return (
+                      <span
+                        key={l.blur}
+                        className="absolute inset-0"
+                        style={{
+                          backdropFilter: `blur(${l.blur}px)`,
+                          WebkitBackdropFilter: `blur(${l.blur}px)`,
+                          maskImage: m,
+                          WebkitMaskImage: m,
+                        }}
+                      />
+                    );
+                  })}
+                  <span
+                    className="absolute inset-0"
+                    style={{
+                      background: `linear-gradient(to ${outer}, rgba(255,255,255,0.1), white 95%)`,
+                    }}
+                  />
+                </span>
               </button>
             );
           })}
@@ -227,38 +281,37 @@ function Overlay({ onExit }: { onExit: () => void }) {
         className="absolute inset-x-0 bottom-0 z-10 bg-linear-to-t from-white from-60% to-transparent pt-16"
       >
         <div className="mx-auto flex w-full max-w-[640px] flex-col gap-2 px-6 pb-6 sm:pb-12">
-          <div
-            aria-live="polite"
-            className="flex flex-col gap-1 rounded-[20px] bg-[#F2F2F2] p-4"
-          >
-            <div className="flex items-baseline justify-between gap-4">
-              <h2 className="text-[15px] font-medium tracking-[-0.03em] text-black">
-                {project.title}
-              </h2>
-              {project.links.length > 0 && (
-                <div className="flex shrink-0 gap-3">
-                  {project.links.map((l) => (
-                    <a
-                      key={l.href}
-                      href={l.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-0.5 text-[13px] font-medium tracking-[-0.03em] text-black/40 transition-colors hover:text-black"
-                    >
-                      {l.label}
-                      <ArrowUpRightIcon
-                        width={18}
-                        height={18}
-                        className="-my-1 -mr-1"
-                      />
-                    </a>
-                  ))}
-                </div>
-              )}
+          <div aria-live="polite" className="rounded-[20px] bg-[#F2F2F2] p-4">
+            <div key={active} className="animate-info-in flex flex-col gap-1">
+              <div className="flex items-baseline justify-between gap-4">
+                <h2 className="text-[15px] font-medium tracking-[-0.03em] text-black">
+                  {project.title}
+                </h2>
+                {project.links.length > 0 && (
+                  <div className="flex shrink-0 gap-3">
+                    {project.links.map((l) => (
+                      <a
+                        key={l.href}
+                        href={l.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-0.5 text-[13px] font-medium tracking-[-0.03em] text-black/40 transition-colors hover:text-black"
+                      >
+                        {l.label}
+                        <ArrowUpRightIcon
+                          width={18}
+                          height={18}
+                          className="-my-1 -mr-1"
+                        />
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <p className="line-clamp-2 h-[42px] text-[15px] leading-[21px] font-medium tracking-[-0.03em] text-black/30">
+                {project.description}
+              </p>
             </div>
-            <p className="line-clamp-2 h-[42px] text-[15px] leading-[21px] font-medium tracking-[-0.03em] text-black/30">
-              {project.description}
-            </p>
           </div>
 
           <div className="grid grid-cols-3 gap-2">

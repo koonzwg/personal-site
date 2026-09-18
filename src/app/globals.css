@@ -16,3 +16,23 @@ body {
   color: var(--foreground);
   font-family: var(--font-inter), system-ui, sans-serif;
 }
+
+@theme {
+  --animate-info-in: info-in 360ms cubic-bezier(0.22, 1, 0.36, 1);
+
+  @keyframes info-in {
+    from {
+      opacity: 0;
+      transform: translateY(3px);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
+}
