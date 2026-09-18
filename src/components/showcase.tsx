@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ChevronRightIcon } from "@/components/icons";
+import { ProjectMedia } from "@/components/project-media";
 import { WorkViewer } from "@/components/work-viewer";
 import { projects } from "@/lib/projects";
 import { buttonSecondary, delay, nudge } from "@/lib/styles";
@@ -105,20 +105,7 @@ export function Showcase() {
               key={i === index ? `on-${index}` : "off"}
               className={`absolute inset-0 grid place-items-center ${i === index && calm !== index ? "settle" : ""}`}
             >
-              {p.media ? (
-                <Image
-                  src={p.media}
-                  alt=""
-                  fill
-                  sizes="(min-width: 640px) 592px, 100vw"
-                  className="object-cover"
-                />
-              ) : (
-                // Placeholder until real work is added.
-                <span className="px-10 text-center text-[28px] font-semibold tracking-[-0.04em] text-black/[0.07]">
-                  {p.title.split(":")[0]}
-                </span>
-              )}
+              <ProjectMedia project={p} sizes={50} />
             </span>
           </span>
         ))}

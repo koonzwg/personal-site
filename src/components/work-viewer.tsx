@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import {
   useCallback,
   useEffect,
@@ -9,6 +8,7 @@ import {
   useState,
 } from "react";
 import { ArrowUpRightIcon, ChevronRightIcon } from "@/components/icons";
+import { ProjectMedia } from "@/components/project-media";
 import { projects } from "@/lib/projects";
 
 // Long, soft ease-out: moves quickly, then settles gently.
@@ -94,8 +94,9 @@ export function WorkViewer({
   useLayoutEffect(() => {
     const el = controls.current;
     if (!el) return;
-    // Measure only the solid part (the gradient's top padding may overlap cards).
-    const ro = new ResizeObserver(() => setControlsH(el.offsetHeight - 64));
+    // The whole controls block, fade included: the active card must never sit under the
+    // white fade (it tints dark work). Neighbors can still slide beneath it.
+    const ro = new ResizeObserver(() => setControlsH(el.offsetHeight - 8));
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
@@ -334,20 +335,7 @@ export function WorkViewer({
                 }}
               >
                 <span className="absolute inset-0 grid place-items-center overflow-hidden rounded-[32px] bg-[#F2F2F2]">
-                  {p.media ? (
-                    <Image
-                      src={p.media}
-                      alt=""
-                      fill
-                      sizes="80vw"
-                      className="object-cover"
-                    />
-                  ) : (
-                    // Placeholder (matches the home-page card) until real work is added.
-                    <span className="px-10 text-center text-[28px] font-semibold tracking-[-0.04em] text-black/[0.07]">
-                      {p.title.split(":")[0]}
-                    </span>
-                  )}
+                  <ProjectMedia project={p} sizes={70} />
                 </span>
                 {/* Progressive layer blur + white fade toward the viewport edge. */}
                 <span
@@ -393,7 +381,7 @@ export function WorkViewer({
       {/* Info + controls float over the cards on a white fade. */}
       <div
         ref={controls}
-        className="absolute inset-x-0 bottom-0 z-10 bg-linear-to-t from-white from-60% to-transparent pt-16"
+        className="absolute inset-x-0 bottom-0 z-10 bg-linear-to-t from-white from-60% to-transparent pt-10"
         style={{
           opacity: shown ? 1 : 0,
           transform: shown ? "none" : "translateY(10px)",

@@ -277,8 +277,7 @@ export function ActivityGraph({
           opacity: hover ? 1 : 0,
           transform: `translate(-50%, calc(-100% - 6px)) scale(${hover ? 1 : 0.94})`,
           transformOrigin: "bottom center",
-          transition:
-            "opacity 150ms ease, transform 150ms ease",
+          transition: "opacity 150ms ease, transform 150ms ease",
         }}
       >
         {tip &&

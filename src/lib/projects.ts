@@ -4,10 +4,22 @@ export type Project = {
   links: { label: string; href: string }[];
   /** Path in /public. Until set, the card renders as a placeholder. */
   media?: string;
+  /** Solid color behind the image (match the export's background so edges disappear). */
+  background?: string;
+  /** Zoom on the centered subject (e.g. 2 = twice as large). Background must be solid. */
+  scale?: number;
 };
 
 // Placeholder copy — edit freely.
 export const projects: Project[] = [
+  {
+    title: "Tinyman",
+    media: "/work/tinyman.png",
+    background: "#242424",
+    scale: 2,
+    description: "Design exploration for Tinyman Swap Protocol.",
+    links: [],
+  },
   {
     title: "Shado: AI Journal & Guide",
     description:
@@ -23,12 +35,6 @@ export const projects: Project[] = [
     title: "Hyperliquid",
     description:
       "Product design exploration for Hyperliquid's trading interface.",
-    links: [],
-  },
-  {
-    title: "Tinyman",
-    description:
-      "Product design exploration for Tinyman's decentralized exchange.",
     links: [],
   },
   {
