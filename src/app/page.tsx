@@ -3,6 +3,8 @@ import { Intro } from "@/components/intro";
 import { Showcase } from "@/components/showcase";
 import { Skills } from "@/components/skills";
 import { Activity } from "@/components/activity";
+import { Experience } from "@/components/experience";
+import { Footer } from "@/components/footer";
 
 export default function Home() {
   return (
@@ -14,6 +16,8 @@ export default function Home() {
         <Skills />
       </div>
       <Activity />
+      <Experience />
+      <Footer />
     </main>
   );
 }
