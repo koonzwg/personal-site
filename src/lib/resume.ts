@@ -26,10 +26,11 @@ export const resume = {
       ],
     },
     {
-      company: "Product Design Studio",
+      company: "Contract & Freelance",
       title: "Product Designer",
       dates: "Jul 2024 – Mar 2026",
       bullets: [
+        "Contract and freelance product design for agencies and early-stage product teams.",
         "Led product design across web applications, crypto/DeFi products, and early-stage software, translating ambiguous requirements into user flows, interaction models, design systems, high-fidelity prototypes, and developer-ready specifications.",
       ],
     },

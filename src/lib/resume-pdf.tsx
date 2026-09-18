@@ -34,10 +34,10 @@ const s = StyleSheet.create({
     fontFamily: "Inter",
     fontSize: 8.5,
     color: body,
-    paddingTop: 32,
-    paddingBottom: 26,
+    paddingTop: 28,
+    paddingBottom: 22,
     paddingHorizontal: 44,
-    lineHeight: 1.34,
+    lineHeight: 1.32,
   },
   name: {
     fontSize: 20,
@@ -56,7 +56,7 @@ const s = StyleSheet.create({
   },
   contact: { marginTop: 7, fontSize: 8.5, color: body, lineHeight: 1.45 },
   link: { color: ink, textDecoration: "none" },
-  section: { marginTop: 11 },
+  section: { marginTop: 10 },
   heading: {
     fontSize: 7.5,
     fontWeight: 600,
@@ -68,7 +68,7 @@ const s = StyleSheet.create({
     borderBottomColor: rule,
     marginBottom: 6,
   },
-  role: { marginBottom: 6 },
+  role: { marginBottom: 5 },
   roleTop: {
     flexDirection: "row",
     justifyContent: "space-between",

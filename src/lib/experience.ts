@@ -18,11 +18,11 @@ export const experience: Role[] = [
     stack: ["Figma", "SwiftUI", "Supabase", "PostgreSQL", "Claude Code"],
   },
   {
-    company: "Design Studio",
+    company: "Contract & Freelance",
     title: "Product Designer",
     dates: "Jul 2024 – Mar 2026",
     description:
-      "Led product design across web apps, crypto/DeFi, and early-stage software, turning ambiguous requirements into user flows, interaction models, design systems, and developer-ready prototypes.",
+      "Contract and freelance product design for agencies and early-stage product teams across web apps, crypto/DeFi, and early-stage software, turning ambiguous requirements into user flows, interaction models, design systems, and developer-ready prototypes.",
     stack: ["Figma", "Prototyping", "Design systems", "Developer handoff"],
   },
   {
