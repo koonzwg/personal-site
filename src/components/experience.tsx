@@ -1,19 +1,30 @@
+import { Reveal } from "@/components/reveal";
 import { experience } from "@/lib/experience";
+import { delay } from "@/lib/styles";
 
 const type = "text-[15px] font-medium tracking-[-0.03em]";
+const rise = { "--enter-y": "8px" } as React.CSSProperties;
 
 export function Experience() {
   return (
     <section className="flex flex-col gap-5">
-      <h2 className={`${type} font-semibold text-black`}>Experience</h2>
+      <Reveal>
+        <h2 className={`${type} enter font-semibold text-black`}>Experience</h2>
+      </Reveal>
       <ol className="flex flex-col">
         {experience.map((role) => (
-          <li
+          // Each role reveals on its own as it scrolls in: header → title → description → stack,
+          // then the divider draws beneath it.
+          <Reveal
+            as="li"
             key={role.company}
-            className="border-b border-[#F2F2F2] py-[30px] first:pt-0"
+            className="relative py-[30px] first:pt-0"
           >
             <div className="flex flex-col gap-0.5">
-              <div className="flex items-baseline justify-between gap-4">
+              <div
+                className="enter flex items-baseline justify-between gap-4"
+                style={rise}
+              >
                 <h3 className={`${type} font-semibold text-black`}>
                   {role.company}
                 </h3>
@@ -21,15 +32,31 @@ export function Experience() {
                   {role.dates}
                 </span>
               </div>
-              <p className={`${type} text-black`}>{role.title}</p>
+              <p
+                className={`${type} enter text-black`}
+                style={{ ...rise, ...delay(40) }}
+              >
+                {role.title}
+              </p>
             </div>
-            <p className={`${type} mt-5 leading-[1.45] text-black/30`}>
+            <p
+              className={`${type} enter mt-5 leading-[1.45] text-black/30`}
+              style={{ ...rise, ...delay(80) }}
+            >
               {role.description}
             </p>
-            <p className={`${type} mt-2.5 text-black/30`}>
+            <p
+              className={`${type} enter mt-2.5 text-black/30`}
+              style={{ ...rise, ...delay(120) }}
+            >
               {role.stack.join(" / ")}
             </p>
-          </li>
+            <span
+              aria-hidden
+              className="draw absolute inset-x-0 bottom-0 h-px bg-[#F2F2F2]"
+              style={delay(260)}
+            />
+          </Reveal>
         ))}
       </ol>
     </section>

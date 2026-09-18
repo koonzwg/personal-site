@@ -1,9 +1,14 @@
+import { Reveal } from "@/components/reveal";
 import { socials } from "@/lib/socials";
+import { delay } from "@/lib/styles";
 
 export function Footer() {
   return (
-    <footer className="-mt-6 flex justify-center sm:justify-end gap-1">
-      {socials.map((s) => (
+    <Reveal
+      as="footer"
+      className="-mt-6 flex justify-center gap-1 sm:justify-end"
+    >
+      {socials.map((s, i) => (
         <a
           key={s.name}
           href={s.href}
@@ -11,7 +16,8 @@ export function Footer() {
           rel="noopener noreferrer"
           aria-label={s.name}
           title={s.name}
-          className="grid size-[34px] place-items-center rounded-[10px] text-[#919191] transition-colors hover:bg-[#F2F2F2] hover:text-black"
+          style={delay(200 + i * 50)}
+          className="enter grid size-[34px] place-items-center rounded-[10px] text-[#919191] transition-colors hover:bg-[#F2F2F2] hover:text-black"
         >
           <svg
             viewBox="0 0 24 24"
@@ -24,6 +30,6 @@ export function Footer() {
           </svg>
         </a>
       ))}
-    </footer>
+    </Reveal>
   );
 }

@@ -77,6 +77,44 @@ body {
   animation-delay: var(--carve-d, 0ms);
 }
 
+/* ---------- Scroll reveals ----------
+   Animations inside a [data-reveal] group hold their first frame until the group is in view.
+   Gated on html.js so content is never stuck hidden without JavaScript. */
+.js [data-reveal]:not([data-inview]),
+.js [data-reveal]:not([data-inview]) * {
+  animation-play-state: paused !important;
+}
+
+@keyframes draw {
+  from {
+    transform: scaleX(0);
+  }
+}
+@utility draw {
+  transform-origin: left;
+  animation: draw 800ms cubic-bezier(0.65, 0, 0.35, 1) both;
+  animation-delay: var(--d, 0ms);
+}
+
+/* Activity grid: squares lay down as a wave (--d1), then activity paints in (--d2). */
+@keyframes cell-in {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+@keyframes paint {
+  from {
+    background-color: #f2f2f2;
+  }
+}
+@utility cell-intro {
+  animation:
+    cell-in 380ms cubic-bezier(0.22, 1, 0.36, 1) both,
+    paint 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--d1, 0ms), var(--d2, 0ms);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
