@@ -18,7 +18,7 @@ export function Header() {
           className="size-16 rounded-full object-cover"
         />
         <div className="flex flex-col gap-1">
-          <h1 className={`${text} text-black`}>William Koonz</h1>
+          <p className={`${text} text-black`}>William Koonz</p>
           <p className={`${text} text-black/40`}>Design Engineer</p>
         </div>
       </div>
