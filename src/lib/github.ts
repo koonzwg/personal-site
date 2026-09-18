@@ -9,7 +9,7 @@ export async function getContributions(year: number): Promise<Contributions> {
       `https://github.com/users/${GITHUB_USER}/contributions?from=${year}-01-01&to=${year}-12-31`,
       {
         headers: { "X-Requested-With": "XMLHttpRequest" },
-        next: { revalidate: 60 * 60 * 6 },
+        next: { revalidate: 60 * 60 },
       },
     );
     if (!res.ok) return {};
