@@ -15,6 +15,35 @@ export const LEVEL_COLORS = [
 
 const label = "text-[11px] font-medium tracking-[-0.03em] text-black/40";
 
+const fmtDay = (date: string) =>
+  new Date(`${date}T00:00:00Z`).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+
+/** Eases a number toward `target` (ease-out cubic). Rolls from the previous value on change. */
+function useCountUp(target: number, active: boolean, ms = 900) {
+  const [value, setValue] = useState(0);
+  const from = useRef(0);
+  useEffect(() => {
+    if (!active) return;
+    const start = performance.now();
+    const a = from.current;
+    let raf = 0;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / ms);
+      const v = Math.round(a + (target - a) * (1 - Math.pow(1 - t, 3)));
+      from.current = v;
+      setValue(v);
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, active, ms]);
+  return value;
+}
+
 function yearDays(year: number) {
   const days: string[] = [];
   const d = new Date(Date.UTC(year, 0, 1));
@@ -34,9 +63,42 @@ export function ActivityGraph({
 }) {
   const [year, setYear] = useState(years[0]);
   const { days, offset } = yearDays(year);
-  const levels = data[year] ?? {};
+  const levels = data[year]?.levels ?? {};
+  const counts = data[year]?.counts ?? {};
+  const total = Object.values(counts).reduce((a, b) => a + b, 0);
   const scroller = useRef<HTMLDivElement>(null);
   const [sectionRef, inView] = useInView<HTMLElement>(0.3);
+  const shownTotal = useCountUp(total, inView);
+
+  // Hover label: "4 contributions · Mar 12". Mouse hover, or tap on touch.
+  const [hover, setHover] = useState<{
+    date: string;
+    x: number;
+    y: number;
+  } | null>(null);
+  // Last hovered cell: keeps the label's text and position while it fades out.
+  const [tip, setTip] = useState<{ date: string; x: number; y: number } | null>(
+    null,
+  );
+  const tapTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const pointAt = (e: React.PointerEvent) => {
+    const cell = (e.target as HTMLElement).closest<HTMLElement>("[data-date]");
+    const section = sectionRef.current;
+    if (!cell || !section) return;
+    const c = cell.getBoundingClientRect();
+    const b = section.getBoundingClientRect();
+    const x = Math.min(
+      Math.max(c.left + c.width / 2 - b.left, 64),
+      b.width - 64,
+    );
+    const next = { date: cell.dataset.date!, x, y: c.top - b.top };
+    setHover(next);
+    setTip(next);
+    if (e.pointerType !== "mouse") {
+      clearTimeout(tapTimer.current);
+      tapTimer.current = setTimeout(() => setHover(null), 2200);
+    }
+  };
   // Column the intro wave starts from: 0 on desktop, the visible centre on mobile.
   const [origin, setOrigin] = useState(0);
   // After the intro, cells drop their keyframes so year switches can transition instead.
@@ -103,7 +165,7 @@ export function ActivityGraph({
       data-reveal=""
       data-inview={inView ? "" : undefined}
       aria-label="GitHub contributions"
-      className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4"
+      className="relative flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4"
     >
       <div className="flex min-w-0 flex-col gap-2 sm:flex-1">
         {/* Columns = weeks (Jan → Dec), rows = Sun → Sat.
@@ -112,7 +174,12 @@ export function ActivityGraph({
           ref={scroller}
           className="overflow-x-auto [scrollbar-width:none] [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)] sm:overflow-visible sm:[mask-image:none] [&::-webkit-scrollbar]:hidden"
         >
-          <div className="grid w-max grid-flow-col grid-rows-7 auto-cols-[12px] gap-[2px] sm:w-auto sm:auto-cols-fr">
+          <div
+            onPointerOver={(e) => e.pointerType === "mouse" && pointAt(e)}
+            onPointerDown={(e) => e.pointerType !== "mouse" && pointAt(e)}
+            onPointerLeave={(e) => e.pointerType === "mouse" && setHover(null)}
+            className="grid w-max grid-flow-col grid-rows-7 auto-cols-[12px] gap-[2px] sm:w-auto sm:auto-cols-fr"
+          >
             {cells.map((date, i) => {
               const col = Math.floor(i / 7);
               const row = i % 7;
@@ -121,11 +188,15 @@ export function ActivityGraph({
               return (
                 <span
                   key={i}
-                  title={date ?? undefined}
+                  data-date={date ?? undefined}
                   className={`aspect-square rounded-[3px] sm:rounded-[2px] ${introDone ? "" : "cell-intro"}`}
                   style={
                     {
                       backgroundColor: LEVEL_COLORS[level],
+                      boxShadow:
+                        hover && date === hover.date
+                          ? "0 0 0 1px rgba(0,0,0,0.45)"
+                          : undefined,
                       // Intro: grid lays down as a diagonal wave, then activity paints in behind it.
                       "--d1": `${dist * 8 + row * 10}ms`,
                       "--d2": `${450 + dist * 8 + row * 10}ms`,
@@ -145,7 +216,9 @@ export function ActivityGraph({
           className="enter flex items-center justify-between"
           style={delay(250)}
         >
-          <span className={label}>Contributions</span>
+          <span className={`${label} tabular-nums`}>
+            {shownTotal.toLocaleString("en-US")} contributions in {year}
+          </span>
           <div className="flex items-center gap-1">
             <span className={label}>Less</span>
             <div className="flex gap-[2px]">
@@ -186,13 +259,30 @@ export function ActivityGraph({
             type="button"
             onClick={() => setYear(y)}
             aria-pressed={y === year}
-            className={`${button} relative cursor-pointer outline-none transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-black/20 hover:opacity-100 ${
+            className={`${button} relative cursor-pointer ${
               y === year ? "text-black" : "text-black/25 hover:text-black/50"
             } ${pill ? "" : y === year ? "bg-[#F2F2F2]" : ""}`}
           >
             {y}
           </button>
         ))}
+      </div>
+
+      <div
+        aria-hidden
+        className="pointer-events-none absolute z-10 rounded-[6px] bg-black px-2 py-1 text-[11px] font-medium tracking-[-0.02em] whitespace-nowrap text-white tabular-nums shadow-sm"
+        style={{
+          left: tip?.x ?? 0,
+          top: tip?.y ?? 0,
+          opacity: hover ? 1 : 0,
+          transform: `translate(-50%, calc(-100% - 6px)) scale(${hover ? 1 : 0.94})`,
+          transformOrigin: "bottom center",
+          transition:
+            "opacity 150ms ease, transform 150ms ease",
+        }}
+      >
+        {tip &&
+          `${(counts[tip.date] ?? 0) === 0 ? "No" : counts[tip.date].toLocaleString("en-US")} contribution${counts[tip.date] === 1 ? "" : "s"} · ${fmtDay(tip.date)}`}
       </div>
     </section>
   );

@@ -18,7 +18,7 @@ export function Intro() {
       </h1>
       <p
         style={delay(300)}
-        className="enter text-[15px] leading-6 font-medium tracking-[-0.03em] text-black/60"
+        className="enter text-[15px] leading-6 text-pretty font-medium tracking-[-0.03em] text-black/60"
       >
         I work across product strategy, UX/UI, engineering, and AI, wherever the
         problem needs me. Currently building{" "}
@@ -26,7 +26,7 @@ export function Intro() {
           href="https://apps.apple.com/app/id6777745636"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-black underline decoration-1 underline-offset-[3px] transition-opacity hover:opacity-70"
+          className="text-black underline decoration-black/30 decoration-1 underline-offset-[3px] transition-[text-decoration-color] duration-200 hover:decoration-black"
         >
           Shado
         </a>

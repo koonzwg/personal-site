@@ -11,6 +11,11 @@
   --font-sans: var(--font-inter);
 }
 
+::selection {
+  background: #111;
+  color: #fff;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -29,6 +34,8 @@ body {
 }
 
 /* ---------- Entrance motion ----------
+   fill-mode `backwards`: hold the first frame during the delay, then release to the element's
+   own styles when done, so hover/active transforms keep working afterwards.
    One recipe site-wide: fade + rise + un-blur on a soft ease-out.
    Stagger with the --d custom property (see `delay()` in lib/styles). */
 @keyframes enter {
@@ -46,11 +53,11 @@ body {
   }
 }
 @utility enter {
-  animation: enter 650ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: enter 650ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
   animation-delay: var(--d, 0ms);
 }
 @utility enter-scale {
-  animation: enter-scale 650ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: enter-scale 650ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
   animation-delay: var(--d, 0ms);
 }
 
@@ -67,13 +74,13 @@ body {
 }
 @utility showcase-in {
   animation:
-    enter 650ms cubic-bezier(0.22, 1, 0.36, 1) both,
-    corner-square 750ms cubic-bezier(0.76, 0, 0.24, 1) both;
+    enter 650ms cubic-bezier(0.22, 1, 0.36, 1) backwards,
+    corner-square 750ms cubic-bezier(0.76, 0, 0.24, 1) backwards;
   animation-delay: var(--d, 0ms), var(--carve-d, 0ms);
 }
 @utility carve {
   transform-origin: top right;
-  animation: carve 750ms cubic-bezier(0.76, 0, 0.24, 1) both;
+  animation: carve 750ms cubic-bezier(0.76, 0, 0.24, 1) backwards;
   animation-delay: var(--carve-d, 0ms);
 }
 
@@ -92,7 +99,7 @@ body {
 }
 @utility draw {
   transform-origin: left;
-  animation: draw 800ms cubic-bezier(0.65, 0, 0.35, 1) both;
+  animation: draw 800ms cubic-bezier(0.65, 0, 0.35, 1) backwards;
   animation-delay: var(--d, 0ms);
 }
 
@@ -110,8 +117,8 @@ body {
 }
 @utility cell-intro {
   animation:
-    cell-in 380ms cubic-bezier(0.22, 1, 0.36, 1) both,
-    paint 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    cell-in 380ms cubic-bezier(0.22, 1, 0.36, 1) backwards,
+    paint 420ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
   animation-delay: var(--d1, 0ms), var(--d2, 0ms);
 }
 
@@ -123,4 +130,14 @@ body {
     animation-delay: 0ms !important;
     transition-duration: 1ms !important;
   }
+}
+
+/* Showcase slides: a slow settle while each project is on screen. */
+@keyframes settle {
+  from {
+    transform: scale(1.045);
+  }
+}
+@utility settle {
+  animation: settle 6s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }

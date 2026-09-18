@@ -49,3 +49,11 @@ export function ArrowUpRightIcon(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function CheckIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base} strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M3.5 8.5L6.5 11.5L12.5 4.5" />
+    </svg>
+  );
+}

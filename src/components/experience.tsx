@@ -1,3 +1,4 @@
+import { ArrowUpRightIcon } from "@/components/icons";
 import { Reveal } from "@/components/reveal";
 import { experience } from "@/lib/experience";
 import { delay } from "@/lib/styles";
@@ -26,7 +27,23 @@ export function Experience() {
                 style={rise}
               >
                 <h3 className={`${type} font-semibold text-black`}>
-                  {role.company}
+                  {role.href ? (
+                    <a
+                      href={role.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group inline-flex items-center gap-0.5 rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-black/15"
+                    >
+                      {role.company}
+                      <ArrowUpRightIcon
+                        width={16}
+                        height={16}
+                        className="-translate-x-1 translate-y-0.5 text-black/40 opacity-0 transition-[opacity,transform] duration-200 ease-out group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:opacity-100"
+                      />
+                    </a>
+                  ) : (
+                    role.company
+                  )}
                 </h3>
                 <span className={`${type} shrink-0 text-black/30`}>
                   {role.dates}
@@ -40,7 +57,7 @@ export function Experience() {
               </p>
             </div>
             <p
-              className={`${type} enter mt-5 leading-[1.45] text-black/30`}
+              className={`${type} enter mt-5 leading-[1.45] text-pretty text-black/30`}
               style={{ ...rise, ...delay(80) }}
             >
               {role.description}

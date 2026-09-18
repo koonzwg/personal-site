@@ -8,7 +8,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { createPortal } from "react-dom";
 import { ArrowUpRightIcon, ChevronRightIcon } from "@/components/icons";
 import { projects } from "@/lib/projects";
 
@@ -69,8 +68,14 @@ function useStageSize(ref: React.RefObject<HTMLDivElement | null>) {
   return size;
 }
 
-function Overlay({ onExit }: { onExit: () => void }) {
-  const [active, setActive] = useState(0);
+export function WorkViewer({
+  onExit,
+  initial = 0,
+}: {
+  onExit: () => void;
+  initial?: number;
+}) {
+  const [active, setActive] = useState(initial);
   const [shown, setShown] = useState(false);
   const stage = useRef<HTMLDivElement>(null);
   const root = useRef<HTMLDivElement>(null);
@@ -398,28 +403,5 @@ function ControlButton({
     >
       {children}
     </button>
-  );
-}
-
-export function ViewAllButton({ className }: { className?: string }) {
-  const [open, setOpen] = useState(false);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const close = useCallback(() => {
-    setOpen(false);
-    triggerRef.current?.focus({ preventScroll: true });
-  }, []);
-  return (
-    <>
-      <button
-        ref={triggerRef}
-        type="button"
-        onClick={() => setOpen(true)}
-        className={`${className ?? ""} cursor-pointer`}
-      >
-        View all
-        <ChevronRightIcon className="-mx-1" />
-      </button>
-      {open && createPortal(<Overlay onExit={close} />, document.body)}
-    </>
   );
 }

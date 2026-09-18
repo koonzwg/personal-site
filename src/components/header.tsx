@@ -9,7 +9,7 @@ export function Header() {
     <header className="flex items-center justify-between">
       <div className="flex items-center gap-4">
         <Image
-          src="/headshot.png"
+          src="/headshot.jpg"
           alt="William Koonz"
           width={64}
           height={64}

@@ -4,11 +4,13 @@ export type Role = {
   dates: string;
   description: string;
   stack: string[];
+  href?: string;
 };
 
 export const experience: Role[] = [
   {
     company: "Shado",
+    href: "https://apps.apple.com/us/app/shado-ai-journal-guide/id6777745636",
     title: "Founder · AI Product & Design Engineer",
     dates: "Apr 2026 – Present",
     description:
@@ -33,6 +35,7 @@ export const experience: Role[] = [
   },
   {
     company: "Goodkleen",
+    href: "https://goodkleenprototype.webflow.io/",
     title: "Founder",
     dates: "Mar 2023 – Feb 2024",
     description:
