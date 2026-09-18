@@ -1,9 +1,9 @@
 import Image from "next/image";
-import { FileIcon, SendIcon } from "@/components/icons";
+import { ResumeIcon, EmailIcon } from "@/components/icons";
 
 const text = "text-[17px] font-medium tracking-[-0.03em] leading-tight";
 const button =
-  "inline-flex items-center gap-[5px] rounded-[10px] px-2.5 py-2 text-[15px] font-medium tracking-[-0.03em] transition-opacity hover:opacity-80";
+  "inline-flex h-[34px] items-center gap-[5px] rounded-[10px] px-3 text-[15px] font-medium tracking-[-0.03em] transition-opacity hover:opacity-80";
 
 export function Header() {
   return (
@@ -30,14 +30,14 @@ export function Header() {
           rel="noopener noreferrer"
           className={`${button} bg-black text-white`}
         >
-          <FileIcon />
+          <ResumeIcon />
           Resume
         </a>
         <a
           href="mailto:koonzwg@gmail.com"
           className={`${button} bg-[#F2F2F2] text-[#919191]`}
         >
-          <SendIcon />
+          <EmailIcon />
           Email
         </a>
       </div>
