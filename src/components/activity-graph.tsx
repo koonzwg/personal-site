@@ -78,7 +78,7 @@ export function ActivityGraph({
             type="button"
             onClick={() => setYear(y)}
             aria-pressed={y === year}
-            className={`${button} cursor-pointer ${
+            className={`${button} cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-black/20 ${
               y === year
                 ? "bg-[#F2F2F2] text-black hover:opacity-100"
                 : "text-black/25 hover:text-black/50 hover:opacity-100"
