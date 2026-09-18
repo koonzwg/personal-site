@@ -338,7 +338,11 @@ export function WorkViewer({
                 }}
               >
                 <span className="absolute inset-0 grid place-items-center overflow-hidden rounded-[32px] bg-[#F2F2F2]">
-                  <ProjectMedia project={p} />
+                  <ProjectMedia
+                    project={p}
+                    eager={isActive}
+                    sizes="(min-width: 640px) 62vw, 100vw"
+                  />
                 </span>
                 {/* Progressive layer blur + white fade toward the viewport edge. */}
                 <span

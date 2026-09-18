@@ -10,7 +10,17 @@ import type { Project } from "@/lib/projects";
  * browser rasterizes small and then stretches), and exports are served as-is (`unoptimized`)
  * so text and edges aren't re-compressed. Keep exports as optimized PNGs.
  */
-export function ProjectMedia({ project: p }: { project: Project }) {
+export function ProjectMedia({
+  project: p,
+  eager = false,
+  sizes,
+}: {
+  project: Project;
+  /** Load immediately (the first thing someone sees, e.g. the home card's first slide). */
+  eager?: boolean;
+  /** How wide the card renders, e.g. "(min-width: 640px) 592px, 100vw". */
+  sizes: string;
+}) {
   if (!p.media) {
     // Placeholder until real work is added.
     return (
@@ -34,6 +44,9 @@ export function ProjectMedia({ project: p }: { project: Project }) {
           alt={p.title}
           fill
           unoptimized
+          sizes={sizes}
+          loading={eager ? "eager" : "lazy"}
+          fetchPriority={eager ? "high" : undefined}
           className="object-contain"
         />
       </span>
