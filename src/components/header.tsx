@@ -3,7 +3,7 @@ import { FileIcon, SendIcon } from "@/components/icons";
 
 const text = "text-[17px] font-medium tracking-[-0.03em] leading-tight";
 const button =
-  "inline-flex h-[34px] items-center gap-[5px] rounded-[10px] px-3 text-[15px] font-medium tracking-[-0.03em] transition-opacity hover:opacity-80";
+  "inline-flex items-center gap-[5px] rounded-[10px] px-2.5 py-2 text-[15px] font-medium tracking-[-0.03em] transition-opacity hover:opacity-80";
 
 export function Header() {
   return (
