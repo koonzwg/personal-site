@@ -9,7 +9,6 @@ import {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
-import { Header } from "@/components/header";
 import { ArrowUpRightIcon, ChevronRightIcon } from "@/components/icons";
 import { projects } from "@/lib/projects";
 
@@ -56,6 +55,16 @@ function Overlay({ onExit }: { onExit: () => void }) {
   const [shown, setShown] = useState(false);
   const stage = useRef<HTMLDivElement>(null);
   const root = useRef<HTMLDivElement>(null);
+  const controls = useRef<HTMLDivElement>(null);
+  const [controlsH, setControlsH] = useState(200);
+  useLayoutEffect(() => {
+    const el = controls.current;
+    if (!el) return;
+    // Measure only the solid part (the gradient's top padding may overlap cards).
+    const ro = new ResizeObserver(() => setControlsH(el.offsetHeight - 64));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
   const size = useStageSize(stage);
   const last = projects.length - 1;
 
@@ -139,23 +148,20 @@ function Overlay({ onExit }: { onExit: () => void }) {
       aria-modal="true"
       aria-label="Work"
       tabIndex={-1}
-      className="fixed inset-0 z-50 flex flex-col bg-white outline-none"
+      onWheel={onWheel}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+      className="fixed inset-0 z-50 touch-none overflow-hidden bg-white outline-none"
       style={{
         opacity: shown ? 1 : 0,
         transition: `opacity ${shown ? 260 : 200}ms ${EASE}`,
       }}
     >
-      <div className="mx-auto w-full max-w-[640px] shrink-0 px-6 pt-8 sm:pt-16">
-        <Header />
-      </div>
-
       <div
         ref={stage}
-        onWheel={onWheel}
-        onTouchStart={onTouchStart}
-        onTouchEnd={onTouchEnd}
-        className="relative my-6 min-h-0 flex-1 touch-none overflow-hidden"
+        className="absolute inset-x-0 top-6 sm:top-12"
         style={{
+          bottom: controlsH + 16,
           transform: shown ? "none" : "translateY(8px)",
           transition: `transform ${DURATION}ms ${EASE}`,
         }}
@@ -215,66 +221,76 @@ function Overlay({ onExit }: { onExit: () => void }) {
           })}
       </div>
 
-      <div className="mx-auto flex w-full max-w-[640px] shrink-0 flex-col gap-2 px-6 pb-6 sm:pb-12">
-        <div
-          aria-live="polite"
-          className="flex flex-col gap-1 rounded-[20px] bg-[#F2F2F2] p-4"
-        >
-          <div className="flex items-baseline justify-between gap-4">
-            <h2 className="text-[15px] font-medium tracking-[-0.03em] text-black">
-              {project.title}
-            </h2>
-            {project.links.length > 0 && (
-              <div className="flex shrink-0 gap-3">
-                {project.links.map((l) => (
-                  <a
-                    key={l.href}
-                    href={l.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-0.5 text-[13px] font-medium tracking-[-0.03em] text-black/40 transition-colors hover:text-black"
-                  >
-                    {l.label}
-                    <ArrowUpRightIcon width={12} height={12} />
-                  </a>
-                ))}
-              </div>
-            )}
+      {/* Info + controls float over the cards on a white fade. */}
+      <div
+        ref={controls}
+        className="absolute inset-x-0 bottom-0 z-10 bg-linear-to-t from-white from-60% to-transparent pt-16"
+      >
+        <div className="mx-auto flex w-full max-w-[640px] flex-col gap-2 px-6 pb-6 sm:pb-12">
+          <div
+            aria-live="polite"
+            className="flex flex-col gap-1 rounded-[20px] bg-[#F2F2F2] p-4"
+          >
+            <div className="flex items-baseline justify-between gap-4">
+              <h2 className="text-[15px] font-medium tracking-[-0.03em] text-black">
+                {project.title}
+              </h2>
+              {project.links.length > 0 && (
+                <div className="flex shrink-0 gap-3">
+                  {project.links.map((l) => (
+                    <a
+                      key={l.href}
+                      href={l.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-0.5 text-[13px] font-medium tracking-[-0.03em] text-black/40 transition-colors hover:text-black"
+                    >
+                      {l.label}
+                      <ArrowUpRightIcon
+                        width={18}
+                        height={18}
+                        className="-my-1 -mr-1"
+                      />
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+            <p className="line-clamp-2 h-[42px] text-[15px] leading-[21px] font-medium tracking-[-0.03em] text-black/30">
+              {project.description}
+            </p>
           </div>
-          <p className="text-[15px] leading-[1.4] font-medium tracking-[-0.03em] text-black/30">
-            {project.description}
-          </p>
-        </div>
 
-        <div className="grid grid-cols-3 gap-2">
-          {/* Desktop: ← Exit →. Mobile (vertical stack): ↓ Exit ↑ */}
-          <ControlButton
-            label={horizontal ? "Previous project" : "Next project"}
-            disabled={horizontal ? active === 0 : active === last}
-            onClick={() => go(horizontal ? -1 : 1)}
-          >
-            <ChevronRightIcon
-              width={20}
-              height={20}
-              className={horizontal ? "rotate-180" : "rotate-90"}
-            />
-          </ControlButton>
-          <ControlButton label="Exit" onClick={exit}>
-            <span className="text-[15px] font-semibold tracking-[-0.03em]">
-              Exit
-            </span>
-          </ControlButton>
-          <ControlButton
-            label={horizontal ? "Next project" : "Previous project"}
-            disabled={horizontal ? active === last : active === 0}
-            onClick={() => go(horizontal ? 1 : -1)}
-          >
-            <ChevronRightIcon
-              width={20}
-              height={20}
-              className={horizontal ? "" : "-rotate-90"}
-            />
-          </ControlButton>
+          <div className="grid grid-cols-3 gap-2">
+            {/* Desktop: ← Exit →. Mobile (vertical stack): ↓ Exit ↑ */}
+            <ControlButton
+              label={horizontal ? "Previous project" : "Next project"}
+              disabled={horizontal ? active === 0 : active === last}
+              onClick={() => go(horizontal ? -1 : 1)}
+            >
+              <ChevronRightIcon
+                width={20}
+                height={20}
+                className={horizontal ? "rotate-180" : "rotate-90"}
+              />
+            </ControlButton>
+            <ControlButton label="Exit" onClick={exit}>
+              <span className="text-[15px] font-semibold tracking-[-0.03em]">
+                Exit
+              </span>
+            </ControlButton>
+            <ControlButton
+              label={horizontal ? "Next project" : "Previous project"}
+              disabled={horizontal ? active === last : active === 0}
+              onClick={() => go(horizontal ? 1 : -1)}
+            >
+              <ChevronRightIcon
+                width={20}
+                height={20}
+                className={horizontal ? "" : "-rotate-90"}
+              />
+            </ControlButton>
+          </div>
         </div>
       </div>
     </div>
