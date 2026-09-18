@@ -17,15 +17,25 @@ const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 const DURATION = 560;
 const GAP = 10;
 // Progressive blur on neighbors: stacked layers, each blurrier and masked closer to the outer edge.
+// The overlay bleeds past the card (BLEED px) so the card's own edges blur into the page,
+// like a Figma progressive layer blur rather than a blur of just the content.
+// `from` is a fraction of the neighbor's visible slice (inner edge → viewport edge).
 const BLUR_LAYERS = [
-  { blur: 1, from: 0 },
-  { blur: 2, from: 15 },
-  { blur: 4, from: 30 },
-  { blur: 8, from: 45 },
-  { blur: 16, from: 60 },
+  { blur: 2, from: 0 },
+  { blur: 4, from: 0.15 },
+  { blur: 8, from: 0.3 },
+  { blur: 16, from: 0.45 },
+  { blur: 32, from: 0.6 },
 ];
+const BLEED = 48;
 
-type Size = { w: number; h: number; horizontal: boolean };
+type Size = {
+  w: number;
+  h: number;
+  sw: number;
+  sh: number;
+  horizontal: boolean;
+};
 
 function useStageSize(ref: React.RefObject<HTMLDivElement | null>) {
   const [size, setSize] = useState<Size | null>(null);
@@ -44,11 +54,11 @@ function useStageSize(ref: React.RefObject<HTMLDivElement | null>) {
           w = maxW;
           h = w / 1.5;
         }
-        setSize({ w, h, horizontal });
+        setSize({ w, h, sw, sh, horizontal });
       } else {
         const w = Math.min(sw - 48, 592);
         const h = Math.min(w * 1.15, sh * 0.7);
-        setSize({ w, h, horizontal });
+        setSize({ w, h, sw, sh, horizontal });
       }
     };
     measure();
@@ -215,6 +225,12 @@ function Overlay({ onExit }: { onExit: () => void }) {
               ? "none"
               : `transform ${DURATION}ms ${EASE}, opacity ${DURATION}ms ${EASE}`;
             const fade = `opacity ${DURATION}ms ${EASE}`;
+            // Only a slice of each neighbor is on screen, so the blur/fade run across that slice.
+            const visible = horizontal
+              ? (size.sw - size.w) / 2 - GAP
+              : (size.sh - size.h) / 2 - GAP + 40;
+            const span = Math.max(80, visible);
+            const at = (f: number) => `${Math.round(BLEED + f * span)}px`;
             return (
               <button
                 key={p.title}
@@ -222,7 +238,7 @@ function Overlay({ onExit }: { onExit: () => void }) {
                 tabIndex={isActive ? -1 : 0}
                 aria-label={isActive ? p.title : `Show ${p.title}`}
                 onClick={() => !isActive && go(Math.sign(offset))}
-                className={`absolute top-1/2 left-1/2 overflow-hidden rounded-[32px] bg-[#F2F2F2] ${
+                className={`absolute top-1/2 left-1/2 ${
                   isActive ? "cursor-default" : "cursor-pointer"
                 }`}
                 style={{
@@ -234,22 +250,31 @@ function Overlay({ onExit }: { onExit: () => void }) {
                   willChange: "transform",
                 }}
               >
-                {p.media && (
-                  <Image
-                    src={p.media}
-                    alt=""
-                    fill
-                    sizes="80vw"
-                    className="object-cover"
-                  />
-                )}
+                <span className="absolute inset-0 overflow-hidden rounded-[32px] bg-[#F2F2F2]">
+                  {p.media && (
+                    <Image
+                      src={p.media}
+                      alt=""
+                      fill
+                      sizes="80vw"
+                      className="object-cover"
+                    />
+                  )}
+                </span>
+                {/* Progressive layer blur + white fade toward the viewport edge. */}
                 <span
                   aria-hidden
-                  className="pointer-events-none absolute inset-0"
-                  style={{ opacity: isActive ? 0 : 1, transition: fade }}
+                  className="pointer-events-none absolute"
+                  style={{
+                    inset: -BLEED,
+                    opacity: isActive ? 0 : 1,
+                    transition: fade,
+                  }}
                 >
                   {BLUR_LAYERS.map((l) => {
-                    const m = `linear-gradient(to ${outer}, transparent ${l.from}%, black ${l.from + 25}%)`;
+                    const perp = horizontal ? "bottom" : "right";
+                    // Fade along the progress axis, and soften the bleed edges on the cross axis.
+                    const m = `linear-gradient(to ${outer}, transparent ${at(l.from)}, black ${at(l.from + 0.2)}), linear-gradient(to ${perp}, transparent, black ${BLEED}px, black calc(100% - ${BLEED}px), transparent)`;
                     return (
                       <span
                         key={l.blur}
@@ -259,6 +284,8 @@ function Overlay({ onExit }: { onExit: () => void }) {
                           WebkitBackdropFilter: `blur(${l.blur}px)`,
                           maskImage: m,
                           WebkitMaskImage: m,
+                          maskComposite: "intersect",
+                          WebkitMaskComposite: "source-in",
                         }}
                       />
                     );
@@ -266,7 +293,7 @@ function Overlay({ onExit }: { onExit: () => void }) {
                   <span
                     className="absolute inset-0"
                     style={{
-                      background: `linear-gradient(to ${outer}, rgba(255,255,255,0.1), white 95%)`,
+                      background: `linear-gradient(to ${outer}, rgba(255,255,255,0) ${at(0)}, rgba(255,255,255,0.5) ${at(0.35)}, rgba(255,255,255,0.85) ${at(0.7)}, white ${at(1)})`,
                     }}
                   />
                 </span>
