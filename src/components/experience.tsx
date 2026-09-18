@@ -23,7 +23,9 @@ export function Experience() {
               </div>
               <p className={`${type} text-black`}>{role.title}</p>
             </div>
-            <p className={`${type} mt-5 leading-[1.45] text-black/30`}>{role.description}</p>
+            <p className={`${type} mt-5 leading-[1.45] text-black/30`}>
+              {role.description}
+            </p>
             <p className={`${type} mt-2.5 text-black/30`}>
               {role.stack.join(" / ")}
             </p>

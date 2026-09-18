@@ -25,7 +25,11 @@ export function EmailIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg {...base} {...props}>
       <path d="M14.0311 2.03512C12.5791 0.471411 1.657 4.30197 1.66602 5.7005C1.67625 7.28644 5.93141 7.7743 7.11081 8.10524C7.82008 8.30417 8.01001 8.50817 8.17355 9.2519C8.91421 12.6202 9.28608 14.2955 10.1336 14.3329C11.4845 14.3926 15.4482 3.56117 14.0311 2.03512Z" />
-      <path d="M7.66602 8.33333L9.99935 6" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M7.66602 8.33333L9.99935 6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }

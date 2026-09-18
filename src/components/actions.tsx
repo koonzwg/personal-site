@@ -1,9 +1,16 @@
 import { ResumeIcon, EmailIcon } from "@/components/icons";
+import type { CSSProperties } from "react";
 import { buttonPrimary, buttonSecondary } from "@/lib/styles";
 
-export function Actions({ className = "" }: { className?: string }) {
+export function Actions({
+  className = "",
+  style,
+}: {
+  className?: string;
+  style?: CSSProperties;
+}) {
   return (
-    <div className={`items-center gap-2 ${className}`}>
+    <div className={`items-center gap-2 ${className}`} style={style}>
       <a
         href="/resume.pdf"
         target="_blank"

@@ -13,7 +13,13 @@ export function Footer() {
           title={s.name}
           className="grid size-[34px] place-items-center rounded-[10px] text-[#919191] transition-colors hover:bg-[#F2F2F2] hover:text-black"
         >
-          <svg viewBox="0 0 24 24" width={16} height={16} fill="currentColor" aria-hidden>
+          <svg
+            viewBox="0 0 24 24"
+            width={16}
+            height={16}
+            fill="currentColor"
+            aria-hidden
+          >
             <path d={s.path} />
           </svg>
         </a>
