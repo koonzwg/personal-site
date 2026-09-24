@@ -21,6 +21,22 @@ export const projects: Project[] = [
     links: [],
   },
   {
+    title: "Finalform: AI Calorie Tracker",
+    media: "/work/finalform.png",
+    background: "#000000",
+    description:
+      "An iOS calorie tracker that logs food from a photo, a voice note, or a text. Shipped to the App Store, now archived.",
+    links: [],
+  },
+  {
+    title: "Finalform: Onboarding",
+    media: "/work/finalformOnboarding.png",
+    background: "#FFFFFF",
+    description:
+      "The onboarding flow, from name to calculated daily targets.",
+    links: [],
+  },
+  {
     title: "Shado: AI Journal & Guide",
     description:
       "An AI-guided reflection app for iOS that helps people see their patterns across time. Designed, built, and shipped end-to-end.",
@@ -35,12 +51,6 @@ export const projects: Project[] = [
     title: "Hyperliquid",
     description:
       "Product design exploration for Hyperliquid's trading interface.",
-    links: [],
-  },
-  {
-    title: "Finalform: AI Calorie Tracker",
-    description:
-      "An iOS calorie tracker that logs food from a photo, a voice note, or a text. Shipped to the App Store, now archived.",
     links: [],
   },
   {
