@@ -32,8 +32,7 @@ export const projects: Project[] = [
     title: "Finalform: Onboarding",
     media: "/work/finalformOnboarding.png",
     background: "#FFFFFF",
-    description:
-      "The onboarding flow, from name to calculated daily targets.",
+    description: "The onboarding flow, from name to calculated daily targets.",
     links: [],
   },
   {
@@ -53,8 +52,7 @@ export const projects: Project[] = [
     title: "Hyperliquid",
     media: "/work/hyperliquid.png",
     background: "#FFFFFF",
-    description:
-      "Product design exploration for Hyperliquid's trading interface.",
+    description: "Brand system exploration for Hyperliquid.",
     links: [],
   },
   {
@@ -66,11 +64,5 @@ export const projects: Project[] = [
     links: [
       { label: "Website", href: "https://goodkleenprototype.webflow.io/" },
     ],
-  },
-  {
-    title: "MetaPharm",
-    description:
-      "Brand, site, and NFT artwork for a play-to-earn game I founded and led.",
-    links: [{ label: "X", href: "https://x.com/metapharmgame" }],
   },
 ];
