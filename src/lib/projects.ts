@@ -38,6 +38,8 @@ export const projects: Project[] = [
   },
   {
     title: "Shado: AI Journal & Guide",
+    media: "/work/shado.png",
+    background: "#FEF9F3",
     description:
       "An AI-guided reflection app for iOS that helps people see their patterns across time. Designed, built, and shipped end-to-end.",
     links: [
