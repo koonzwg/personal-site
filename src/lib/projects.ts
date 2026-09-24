@@ -51,6 +51,8 @@ export const projects: Project[] = [
   },
   {
     title: "Hyperliquid",
+    media: "/work/hyperliquid.png",
+    background: "#FFFFFF",
     description:
       "Product design exploration for Hyperliquid's trading interface.",
     links: [],
