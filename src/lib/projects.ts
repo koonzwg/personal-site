@@ -57,6 +57,8 @@ export const projects: Project[] = [
   },
   {
     title: "Goodkleen",
+    media: "/work/goodkleen.png",
+    background: "#FFFFFF",
     description:
       "Brand and Webflow site for the residential cleaning company I founded and ran.",
     links: [
