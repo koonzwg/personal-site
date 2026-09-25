@@ -335,8 +335,13 @@ export function WorkViewer({
               </button>
             );
           })}
-        {size && <EdgeBlur size={size} />}
       </div>
+
+      {/* Edge treatment sits outside the stage, pinned to the viewport: cards are clipped by the
+          root, not the stage, so a band inset with the stage leaves an unblurred strip. */}
+      {size && stageRect && (
+        <EdgeBlur size={size} lead={stageRect.top} trail={controlsH + 16} />
+      )}
 
       {/* Info + controls float over the cards on a white fade. */}
       <div
@@ -427,59 +432,80 @@ export function WorkViewer({
 }
 
 /**
- * The blur/fade band at each edge of the stage. Cards slide underneath it; it never moves and its
- * opacity is never animated, so the treatment is identical on every frame of a transition.
- * The band's inner edge sits exactly on the active card's edge, where the fade is fully
+ * The blur/fade band at each edge of the viewport. Cards slide underneath it; it never moves and
+ * its opacity is never animated, so the treatment is identical on every frame of a transition.
+ * Each band runs from the viewport edge in to the active card's edge, where the fade is fully
  * transparent, so the focused card is untouched.
+ *
+ * `lead`/`trail` are the stage's own insets along the scroll axis. The bands have to cover those
+ * too — cards are clipped by the viewport, not by the stage, so they show through otherwise.
  */
-function EdgeBlur({ size }: { size: Size }) {
+function EdgeBlur({
+  size,
+  lead,
+  trail,
+}: {
+  size: Size;
+  lead: number;
+  trail: number;
+}) {
   const { horizontal } = size;
-  const band = Math.round(
-    Math.max(80, horizontal ? (size.sw - size.w) / 2 : (size.sh - size.h) / 2),
+  // Stage edge → active card edge.
+  const gap = Math.max(
+    80,
+    horizontal ? (size.sw - size.w) / 2 : (size.sh - size.h) / 2,
   );
   // `to <side>` starts the gradient at the band's inner edge in every case, so the side name
   // doubles as the gradient direction.
-  const sides = horizontal
-    ? (["left", "right"] as const)
-    : (["top", "bottom"] as const);
-  const px = (f: number) => `${Math.round(f * band)}px`;
+  const bands = horizontal
+    ? ([
+        ["left", gap],
+        ["right", gap],
+      ] as const)
+    : ([
+        ["top", lead + gap],
+        ["bottom", trail + gap],
+      ] as const);
   return (
-    <>
-      {sides.map((side) => (
-        <span
-          key={side}
-          aria-hidden
-          className="pointer-events-none absolute"
-          style={
-            horizontal
-              ? { top: 0, bottom: 0, [side]: 0, width: band }
-              : { left: 0, right: 0, [side]: 0, height: band }
-          }
-        >
-          {BLUR_LAYERS.map((l) => {
-            const m = `linear-gradient(to ${side}, transparent ${px(l.from)}, black ${px(l.from + 0.2)})`;
-            return (
-              <span
-                key={l.blur}
-                className="absolute inset-0"
-                style={{
-                  backdropFilter: `blur(${l.blur}px)`,
-                  WebkitBackdropFilter: `blur(${l.blur}px)`,
-                  maskImage: m,
-                  WebkitMaskImage: m,
-                }}
-              />
-            );
-          })}
+    <div aria-hidden className="pointer-events-none absolute inset-0">
+      {bands.map(([side, extent]) => {
+        const len = Math.round(extent);
+        const px = (f: number) => `${Math.round(f * len)}px`;
+        return (
           <span
-            className="absolute inset-0"
-            style={{
-              background: `linear-gradient(to ${side}, rgba(255,255,255,0) 0px, rgba(255,255,255,0.5) ${px(0.35)}, rgba(255,255,255,0.85) ${px(0.7)}, white ${band}px)`,
-            }}
-          />
-        </span>
-      ))}
-    </>
+            key={side}
+            className="absolute"
+            style={
+              horizontal
+                ? { top: 0, bottom: 0, [side]: 0, width: len }
+                : { left: 0, right: 0, [side]: 0, height: len }
+            }
+          >
+            {BLUR_LAYERS.map((l) => {
+              const m = `linear-gradient(to ${side}, transparent ${px(l.from)}, black ${px(l.from + 0.2)})`;
+              return (
+                <span
+                  key={l.blur}
+                  className="absolute inset-0"
+                  style={{
+                    backdropFilter: `blur(${l.blur}px)`,
+                    WebkitBackdropFilter: `blur(${l.blur}px)`,
+                    maskImage: m,
+                    WebkitMaskImage: m,
+                  }}
+                />
+              );
+            })}
+            <span
+              className="absolute inset-0"
+              style={{
+                background: `linear-gradient(to ${side}, rgba(255,255,255,0) 0px, rgba(255,255,255,0.5) ${px(0.35)}, rgba(255,255,255,0.85) ${px(0.7)}, white ${len}px)`,
+              }}
+            />
+          </span>
+        );
+      })}
+    </div>
   );
 }
 
