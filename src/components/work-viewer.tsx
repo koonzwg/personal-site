@@ -15,18 +15,21 @@ import { projects } from "@/lib/projects";
 const EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
 const DURATION = 560;
 const GAP = 10;
-// Progressive blur on neighbors: stacked layers, each blurrier and masked closer to the outer edge.
-// The overlay bleeds past the card (BLEED px) so the card's own edges blur into the page,
-// like a Figma progressive layer blur rather than a blur of just the content.
-// `from` is a fraction of the neighbor's visible slice (inner edge → viewport edge).
+// Progressive blur at the stage edges: stacked layers, each blurrier and masked closer to the
+// viewport edge, like a Figma progressive layer blur. `from` is a fraction of the band's width.
+//
+// This lives on the STAGE, not on the cards, and is never moved or faded. That is deliberate:
+// animating opacity on a backdrop-filter's ancestor makes it a backdrop root, so the filter has
+// nothing left to sample and the blur silently vanishes for the length of the animation. Pinning
+// it also keeps the gradient correct mid-slide (card-owned gradients are anchored to the card's
+// resting slot) and cuts ~20 moving backdrop layers down to 10 static ones.
+// Three layers, not five: backdrop-filter is the single most expensive thing on this screen, and
+// the outer third of the band sits under 85%+ white anyway, so heavier layers there buy nothing.
 const BLUR_LAYERS = [
   { blur: 2, from: 0 },
-  { blur: 4, from: 0.15 },
-  { blur: 8, from: 0.3 },
-  { blur: 16, from: 0.45 },
-  { blur: 32, from: 0.6 },
+  { blur: 8, from: 0.25 },
+  { blur: 20, from: 0.55 },
 ];
-const BLEED = 48;
 
 type Size = {
   w: number;
@@ -279,14 +282,6 @@ export function WorkViewer({
                   (n - 1) * (len * 0.97 + GAP);
             const x = horizontal ? Math.sign(offset) * dist : 0;
             const y = horizontal ? 0 : Math.sign(offset) * dist;
-            // Neighbors: progressive blur + white fade toward the viewport edge.
-            const outer = horizontal
-              ? offset < 0
-                ? "left"
-                : "right"
-              : offset < 0
-                ? "top"
-                : "bottom";
             // Morph: while in the "origin" phase the active card is sized and placed exactly over
             // the home-page card, then eases into the full view (and back on exit).
             const atOrigin =
@@ -309,13 +304,6 @@ export function WorkViewer({
               : isActive
                 ? `transform ${morph}, width ${morph}, height ${morph}, opacity ${DURATION}ms ${EASE}`
                 : `transform ${DURATION}ms ${EASE}, opacity ${shown ? DURATION : 260}ms ${EASE}`;
-            const fade = `opacity ${DURATION}ms ${EASE}`;
-            // Only a slice of each neighbor is on screen, so the blur/fade run across that slice.
-            const visible = horizontal
-              ? (size.sw - size.w) / 2 - GAP
-              : (size.sh - size.h) / 2 - GAP + 40;
-            const span = Math.max(80, visible);
-            const at = (f: number) => `${Math.round(BLEED + f * span)}px`;
             return (
               <button
                 key={p.title}
@@ -323,7 +311,7 @@ export function WorkViewer({
                 tabIndex={isActive ? -1 : 0}
                 aria-label={isActive ? p.title : `Show ${p.title}`}
                 onClick={() => !isActive && go(Math.sign(offset))}
-                className={`group/card absolute top-1/2 left-1/2 outline-none ${
+                className={`absolute top-1/2 left-1/2 outline-none ${
                   isActive ? "cursor-default" : "cursor-pointer"
                 }`}
                 style={{
@@ -344,45 +332,10 @@ export function WorkViewer({
                     sizes="(min-width: 640px) 62vw, 100vw"
                   />
                 </span>
-                {/* Progressive layer blur + white fade toward the viewport edge. */}
-                <span
-                  aria-hidden
-                  className={`pointer-events-none absolute ${
-                    isActive
-                      ? "opacity-0"
-                      : "opacity-100 group-hover/card:opacity-75"
-                  }`}
-                  style={{ inset: -BLEED, transition: fade }}
-                >
-                  {BLUR_LAYERS.map((l) => {
-                    const perp = horizontal ? "bottom" : "right";
-                    // Fade along the progress axis, and soften the bleed edges on the cross axis.
-                    const m = `linear-gradient(to ${outer}, transparent ${at(l.from)}, black ${at(l.from + 0.2)}), linear-gradient(to ${perp}, transparent, black ${BLEED}px, black calc(100% - ${BLEED}px), transparent)`;
-                    return (
-                      <span
-                        key={l.blur}
-                        className="absolute inset-0"
-                        style={{
-                          backdropFilter: `blur(${l.blur}px)`,
-                          WebkitBackdropFilter: `blur(${l.blur}px)`,
-                          maskImage: m,
-                          WebkitMaskImage: m,
-                          maskComposite: "intersect",
-                          WebkitMaskComposite: "source-in",
-                        }}
-                      />
-                    );
-                  })}
-                  <span
-                    className="absolute inset-0"
-                    style={{
-                      background: `linear-gradient(to ${outer}, rgba(255,255,255,0) ${at(0)}, rgba(255,255,255,0.5) ${at(0.35)}, rgba(255,255,255,0.85) ${at(0.7)}, white ${at(1)})`,
-                    }}
-                  />
-                </span>
               </button>
             );
           })}
+        {size && <EdgeBlur size={size} />}
       </div>
 
       {/* Info + controls float over the cards on a white fade. */}
@@ -470,6 +423,63 @@ export function WorkViewer({
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * The blur/fade band at each edge of the stage. Cards slide underneath it; it never moves and its
+ * opacity is never animated, so the treatment is identical on every frame of a transition.
+ * The band's inner edge sits exactly on the active card's edge, where the fade is fully
+ * transparent, so the focused card is untouched.
+ */
+function EdgeBlur({ size }: { size: Size }) {
+  const { horizontal } = size;
+  const band = Math.round(
+    Math.max(80, horizontal ? (size.sw - size.w) / 2 : (size.sh - size.h) / 2),
+  );
+  // `to <side>` starts the gradient at the band's inner edge in every case, so the side name
+  // doubles as the gradient direction.
+  const sides = horizontal
+    ? (["left", "right"] as const)
+    : (["top", "bottom"] as const);
+  const px = (f: number) => `${Math.round(f * band)}px`;
+  return (
+    <>
+      {sides.map((side) => (
+        <span
+          key={side}
+          aria-hidden
+          className="pointer-events-none absolute"
+          style={
+            horizontal
+              ? { top: 0, bottom: 0, [side]: 0, width: band }
+              : { left: 0, right: 0, [side]: 0, height: band }
+          }
+        >
+          {BLUR_LAYERS.map((l) => {
+            const m = `linear-gradient(to ${side}, transparent ${px(l.from)}, black ${px(l.from + 0.2)})`;
+            return (
+              <span
+                key={l.blur}
+                className="absolute inset-0"
+                style={{
+                  backdropFilter: `blur(${l.blur}px)`,
+                  WebkitBackdropFilter: `blur(${l.blur}px)`,
+                  maskImage: m,
+                  WebkitMaskImage: m,
+                }}
+              />
+            );
+          })}
+          <span
+            className="absolute inset-0"
+            style={{
+              background: `linear-gradient(to ${side}, rgba(255,255,255,0) 0px, rgba(255,255,255,0.5) ${px(0.35)}, rgba(255,255,255,0.85) ${px(0.7)}, white ${band}px)`,
+            }}
+          />
+        </span>
+      ))}
+    </>
   );
 }
 

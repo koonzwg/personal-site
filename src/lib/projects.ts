@@ -21,28 +21,6 @@ export const projects: Project[] = [
     links: [],
   },
   {
-    title: "Finalform: AI Calorie Tracker",
-    media: "/work/finalformRedesign.png",
-    background: "#FFFFFF",
-    description:
-      "An iOS calorie tracker that logs food from a photo, a voice note, or a text. Shipped to the App Store, now archived.",
-    links: [],
-  },
-  {
-    title: "Finalform: Onboarding",
-    media: "/work/finalformOnboarding.png",
-    background: "#FFFFFF",
-    description: "The onboarding flow, from name to calculated daily targets.",
-    links: [],
-  },
-  {
-    title: "Finalform: Original Concept",
-    media: "/work/finalform.png",
-    background: "#000000",
-    description: "The first direction, before the redesign.",
-    links: [],
-  },
-  {
     title: "Shado: AI Journal & Guide",
     media: "/work/shado.png",
     background: "#FEF9F3",
@@ -54,6 +32,28 @@ export const projects: Project[] = [
         href: "https://apps.apple.com/us/app/shado-ai-journal-guide/id6777745636",
       },
     ],
+  },
+  {
+    title: "Finalform: Onboarding",
+    media: "/work/finalformOnboarding.png",
+    background: "#FFFFFF",
+    description: "The onboarding flow, from name to calculated daily targets.",
+    links: [],
+  },
+  {
+    title: "Finalform: AI Calorie Tracker",
+    media: "/work/finalformRedesign.png",
+    background: "#FFFFFF",
+    description:
+      "An iOS calorie tracker that logs food from a photo, a voice note, or a text. Shipped to the App Store, now archived.",
+    links: [],
+  },
+  {
+    title: "Finalform: Original Concept",
+    media: "/work/finalform.png",
+    background: "#000000",
+    description: "The first direction, before the redesign.",
+    links: [],
   },
   {
     title: "Hyperliquid",
