@@ -34,6 +34,22 @@ export const projects: Project[] = [
     ],
   },
   {
+    title: "Shado: App Store",
+    media: "/work/shadoScreenshots1.png",
+    background: "#FFFFFF",
+    description:
+      "Store listing rebuilt as a sales sequence — promise, recognition, and the moment the guide answers.",
+    links: [],
+  },
+  {
+    title: "Shado: App Store, continued",
+    media: "/work/shadoScreenshots2.png",
+    background: "#FFFFFF",
+    description:
+      "The second half of the sequence: the pattern across months, privacy, and the close.",
+    links: [],
+  },
+  {
     title: "Finalform: Onboarding",
     media: "/work/finalformOnboarding.png",
     background: "#FFFFFF",
