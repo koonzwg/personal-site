@@ -58,7 +58,7 @@ export const projects: Project[] = [
   },
   {
     title: "Finalform: Original Concept",
-    media: "/work/finalform.png",
+    media: "/work/finalformOldUI.png",
     background: "#000000",
     description: "The first direction, before the redesign.",
     links: [],
