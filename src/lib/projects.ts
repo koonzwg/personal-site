@@ -22,8 +22,8 @@ export const projects: Project[] = [
   },
   {
     title: "Shado: AI Journal & Guide",
-    media: "/work/shado.png",
-    background: "#FEF9F3",
+    media: "/work/shadoScreenshots1.png",
+    background: "#FFFFFF",
     description:
       "An AI-guided reflection app for iOS that helps people see their patterns across time. Designed, built, and shipped end-to-end.",
     links: [
@@ -34,19 +34,11 @@ export const projects: Project[] = [
     ],
   },
   {
-    title: "Shado: App Store",
-    media: "/work/shadoScreenshots1.png",
-    background: "#FFFFFF",
-    description:
-      "Store listing rebuilt as a sales sequence — promise, recognition, and the moment the guide answers.",
-    links: [],
-  },
-  {
-    title: "Shado: App Store, continued",
+    title: "Shado: Store Listing",
     media: "/work/shadoScreenshots2.png",
     background: "#FFFFFF",
     description:
-      "The second half of the sequence: the pattern across months, privacy, and the close.",
+      "The listing built as a sales sequence: the pattern across months, privacy, and the close.",
     links: [],
   },
   {
