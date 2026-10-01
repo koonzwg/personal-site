@@ -21,9 +21,16 @@ export const projects: Project[] = [
     links: [],
   },
   {
-    title: "Shado: AI Journal & Guide",
-    media: "/work/shadoScreenshots1.png",
+    title: "Hyperliquid",
+    media: "/work/hyperliquid.png",
     background: "#FFFFFF",
+    description: "Brand system exploration for Hyperliquid.",
+    links: [],
+  },
+  {
+    title: "Shado: AI Journal & Guide",
+    media: "/work/shado.png",
+    background: "#FEF9F3",
     description:
       "An AI-guided reflection app for iOS that helps people see their patterns across time. Designed, built, and shipped end-to-end.",
     links: [
@@ -34,11 +41,19 @@ export const projects: Project[] = [
     ],
   },
   {
-    title: "Shado: Store Listing",
+    title: "Shado: App Store",
+    media: "/work/shadoScreenshots1.png",
+    background: "#FFFFFF",
+    description:
+      "Store listing rebuilt as a sales sequence — promise, recognition, and the moment the guide answers.",
+    links: [],
+  },
+  {
+    title: "Shado: App Store, continued",
     media: "/work/shadoScreenshots2.png",
     background: "#FFFFFF",
     description:
-      "The listing built as a sales sequence: the pattern across months, privacy, and the close.",
+      "The second half of the sequence: the pattern across months, privacy, and the close.",
     links: [],
   },
   {
@@ -61,13 +76,6 @@ export const projects: Project[] = [
     media: "/work/finalformOldUI.png",
     background: "#000000",
     description: "The first direction, before the redesign.",
-    links: [],
-  },
-  {
-    title: "Hyperliquid",
-    media: "/work/hyperliquid.png",
-    background: "#FFFFFF",
-    description: "Brand system exploration for Hyperliquid.",
     links: [],
   },
   {
