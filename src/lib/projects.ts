@@ -28,19 +28,6 @@ export const projects: Project[] = [
     links: [],
   },
   {
-    title: "Shado: AI Journal & Guide",
-    media: "/work/shado.png",
-    background: "#FEF9F3",
-    description:
-      "An AI-guided reflection app for iOS that helps people see their patterns across time. Designed, built, and shipped end-to-end.",
-    links: [
-      {
-        label: "App Store",
-        href: "https://apps.apple.com/us/app/shado-ai-journal-guide/id6777745636",
-      },
-    ],
-  },
-  {
     title: "Shado: App Store",
     media: "/work/shadoScreenshots1.png",
     background: "#FFFFFF",
@@ -55,6 +42,19 @@ export const projects: Project[] = [
     description:
       "The second half of the sequence: the pattern across months, privacy, and the close.",
     links: [],
+  },
+  {
+    title: "Shado: AI Journal & Guide",
+    media: "/work/shado.png",
+    background: "#FEF9F3",
+    description:
+      "An AI-guided reflection app for iOS that helps people see their patterns across time. Designed, built, and shipped end-to-end.",
+    links: [
+      {
+        label: "App Store",
+        href: "https://apps.apple.com/us/app/shado-ai-journal-guide/id6777745636",
+      },
+    ],
   },
   {
     title: "Finalform: Onboarding",
